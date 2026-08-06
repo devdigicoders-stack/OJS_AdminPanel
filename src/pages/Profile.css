@@ -1,0 +1,309 @@
+.profile-zen-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-family: 'Inter', sans-serif;
+  background-color: #f8fafc;
+  min-height: calc(100vh - 80px);
+  padding: 40px 20px;
+  overflow-y: auto;
+}
+
+.zen-header {
+  text-align: center;
+  margin-bottom: 30px;
+  animation: fadeInDown 0.5s ease-out;
+}
+.zen-header h1 {
+  margin: 0 0 8px;
+  font-size: 32px;
+  font-weight: 800;
+  color: #0f172a;
+  letter-spacing: -1px;
+}
+.zen-header p {
+  margin: 0;
+  font-size: 15px;
+  color: #64748b;
+}
+
+@keyframes fadeInDown {
+  from { opacity: 0; transform: translateY(-20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.slide-up-zen {
+  animation: slideUpFadeZen 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  opacity: 0;
+}
+@keyframes slideUpFadeZen {
+  from { opacity: 0; transform: translateY(40px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Master Card */
+.zen-card {
+  width: 100%;
+  max-width: 900px;
+  background: #ffffff;
+  border-radius: 30px;
+  box-shadow: 0 20px 60px rgba(15, 23, 42, 0.08);
+  overflow: hidden;
+  position: relative;
+}
+
+/* Cover */
+.zen-cover {
+  height: 220px;
+  background: linear-gradient(135deg, #0f172a, #334155);
+  background-image: url('https://images.unsplash.com/photo-1557683316-973673baf926?q=80&w=2000&auto=format&fit=crop');
+  background-size: cover;
+  background-position: center;
+  position: relative;
+}
+.zen-cover-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, rgba(0,0,0,0.1), rgba(0,0,0,0.6));
+}
+.zen-change-cover {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: rgba(255,255,255,0.2);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255,255,255,0.3);
+  color: white;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.3s;
+}
+.zen-change-cover:hover {
+  background: rgba(255,255,255,0.4);
+}
+
+/* Central Identity */
+.zen-identity {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: -75px;
+  position: relative;
+  z-index: 10;
+  padding-bottom: 30px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.zen-avatar-wrapper {
+  position: relative;
+  margin-bottom: 16px;
+}
+.zen-avatar {
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  border: 6px solid #ffffff;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+  object-fit: cover;
+}
+.zen-change-avatar {
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: #0f172a;
+  color: white;
+  border: 4px solid #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+.zen-change-avatar:hover {
+  transform: scale(1.1);
+}
+
+.zen-name-box {
+  text-align: center;
+}
+.zen-name-box h2 {
+  margin: 0 0 8px;
+  font-size: 28px;
+  color: #0f172a;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.zen-verified {
+  color: #3b82f6;
+  font-size: 24px;
+}
+.zen-role-badge {
+  display: inline-block;
+  padding: 6px 20px;
+  background: #f1f5f9;
+  color: #475569;
+  border-radius: 30px;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+/* Bento Box Content */
+.zen-content {
+  padding: 40px;
+  background: #f8fafc;
+}
+
+.zen-form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+
+.zen-bento-box {
+  background: #ffffff;
+  border-radius: 20px;
+  padding: 24px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.02);
+  border: 1px solid #e2e8f0;
+}
+.zen-bento-box.full-width {
+  grid-column: 1 / -1;
+}
+
+.bento-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+.bento-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: #f1f5f9;
+  color: #475569;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+}
+.bento-icon.blue { background: #eff6ff; color: #2563eb; }
+.bento-icon.purple { background: #f5f3ff; color: #9333ea; }
+
+.bento-header h3 {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.zen-input-group {
+  margin-bottom: 20px;
+}
+.zen-input-group:last-child {
+  margin-bottom: 0;
+}
+.zen-input-group label {
+  display: block;
+  font-size: 13px;
+  font-weight: 700;
+  color: #64748b;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.zen-input-group input,
+.zen-input-group textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 14px 16px;
+  background: #f8fafc;
+  border: 2px solid transparent;
+  border-radius: 12px;
+  font-size: 15px;
+  color: #0f172a;
+  font-family: inherit;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+.zen-input-group input:focus,
+.zen-input-group textarea:focus {
+  background: #ffffff;
+  border-color: #3b82f6;
+  box-shadow: 0 4px 15px rgba(59, 130, 246, 0.1);
+  outline: none;
+}
+.zen-input-group textarea {
+  resize: vertical;
+}
+
+/* Footer Actions */
+.zen-form-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 40px;
+  padding-top: 30px;
+  border-top: 1px solid #e2e8f0;
+}
+
+.zen-btn-security {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 24px;
+  background: transparent;
+  border: 2px solid #e2e8f0;
+  border-radius: 14px;
+  font-size: 14px;
+  font-weight: 700;
+  color: #475569;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.zen-btn-security:hover {
+  background: #f1f5f9;
+  color: #0f172a;
+  border-color: #cbd5e1;
+}
+
+.zen-btn-save {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 16px 40px;
+  background: #0f172a;
+  border: none;
+  border-radius: 14px;
+  font-size: 16px;
+  font-weight: 700;
+  color: #ffffff;
+  cursor: pointer;
+  transition: all 0.3s;
+  box-shadow: 0 10px 25px rgba(15, 23, 42, 0.2);
+}
+.zen-btn-save:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 15px 35px rgba(15, 23, 42, 0.3);
+  background: #1e293b;
+}
+
+.dash-footer {
+  margin-top: 40px;
+  text-align: center;
+  font-size: 13px;
+  color: #94a3b8;
+}
