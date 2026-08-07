@@ -17,6 +17,8 @@ import Publish from './pages/Publish';
 import { Toaster } from 'react-hot-toast';
 import './App.css';
 
+import ProtectedRoute from './components/ProtectedRoute';
+
 function App() {
   return (
     <BrowserRouter>
@@ -25,8 +27,9 @@ function App() {
         <Route path="/login" element={<Login />} />
         
         {/* Admin Layout Routes */}
-        <Route path="/" element={<Layout />}>
-          <Route index element={<Dashboard />} />
+        <Route element={<ProtectedRoute />}>
+          <Route path="/" element={<Layout />}>
+            <Route index element={<Dashboard />} />
           <Route path="users" element={<Users />} />
           <Route path="users/:id" element={<UserDetails />} />
           <Route path="journals" element={<Journals />} />
@@ -39,6 +42,7 @@ function App() {
           <Route path="settings" element={<Settings />} />
           <Route path="profile" element={<Profile />} />
           <Route path="change-password" element={<ChangePassword />} />
+        </Route>
         </Route>
       </Routes>
     </BrowserRouter>
