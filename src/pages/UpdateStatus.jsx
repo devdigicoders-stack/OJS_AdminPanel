@@ -44,7 +44,7 @@ const UpdateStatus = () => {
   const fetchJournals = async () => {
     try {
       const token = localStorage.getItem('adminToken');
-      const response = await fetch('http://localhost:5000/api/journals', {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/journals`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       const data = await response.json();
@@ -79,7 +79,7 @@ const UpdateStatus = () => {
     const newStatus = pendingChanges[id];
     try {
       const token = localStorage.getItem('adminToken');
-      const response = await fetch(`http://localhost:5000/api/journals/${id}/status`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/journals/${id}/status`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -111,7 +111,7 @@ const UpdateStatus = () => {
       const token = localStorage.getItem('adminToken');
       const updates = idsToUpdate.map(id => ({ id, status: pendingChanges[id] }));
       
-      const response = await fetch('http://localhost:5000/api/journals/bulk-status', {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/journals/bulk-status`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

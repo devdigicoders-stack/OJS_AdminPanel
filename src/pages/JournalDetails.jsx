@@ -16,7 +16,7 @@ const JournalDetails = () => {
     const fetchJournal = async () => {
       try {
         const token = localStorage.getItem('adminToken');
-        const res = await fetch(`http://localhost:5000/api/journals/${id}`, {
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/journals/${id}`, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         if (res.ok) {
@@ -47,8 +47,8 @@ const JournalDetails = () => {
     try {
       const token = localStorage.getItem('adminToken');
       const url = newStatus === 'Published' 
-        ? `http://localhost:5000/api/journals/${id}/publish` 
-        : `http://localhost:5000/api/journals/${id}/status`;
+        ? `${import.meta.env.VITE_API_URL}/journals/${id}/publish` 
+        : `${import.meta.env.VITE_API_URL}/journals/${id}/status`;
       
       const bodyData = newStatus === 'Published' ? extraData : { status: newStatus, ...extraData };
 

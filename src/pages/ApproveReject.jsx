@@ -34,7 +34,7 @@ const ApproveReject = () => {
   const fetchJournals = async () => {
     try {
       const token = localStorage.getItem('adminToken');
-      const response = await fetch('http://localhost:5000/api/journals', {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/journals`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       const data = await response.json();
@@ -122,7 +122,7 @@ const ApproveReject = () => {
       const token = localStorage.getItem('adminToken');
       const newStatus = modalType === 'approve' ? 'Approved' : 'Rejected';
       
-      const response = await fetch(`http://localhost:5000/api/journals/${selectedJournal._id}/status`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/journals/${selectedJournal._id}/status`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

@@ -34,7 +34,7 @@ const Users = () => {
       const token = localStorage.getItem('adminToken');
       if (!token) return;
 
-      const response = await fetch('http://localhost:5000/api/users', {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/users`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -116,7 +116,7 @@ const Users = () => {
       }
 
       if (modalType === 'add') {
-        const response = await fetch('http://localhost:5000/api/users', {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/users`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -140,7 +140,7 @@ const Users = () => {
           toast.error(data.message || 'Failed to add user');
         }
       } else if (modalType === 'edit') {
-        const response = await fetch(`http://localhost:5000/api/users/${selectedUser.id}`, {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/users/${selectedUser.id}`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
@@ -168,7 +168,7 @@ const Users = () => {
   const handleDeleteUser = async () => {
     try {
       const token = localStorage.getItem('adminToken');
-      const response = await fetch(`http://localhost:5000/api/users/${selectedUser.id}`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/users/${selectedUser.id}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`

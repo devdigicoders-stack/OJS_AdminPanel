@@ -38,7 +38,7 @@ const Publish = () => {
   const fetchJournals = async () => {
     try {
       const token = localStorage.getItem('adminToken');
-      const response = await fetch('http://localhost:5000/api/journals', {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/journals`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       const data = await response.json();
@@ -105,7 +105,7 @@ const Publish = () => {
 
     try {
       const token = localStorage.getItem('adminToken');
-      const response = await fetch(`http://localhost:5000/api/journals/${selectedJournal._id}/publish`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/journals/${selectedJournal._id}/publish`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

@@ -71,35 +71,35 @@ const Dashboard = () => {
       };
 
       // Fetch Stats
-      const statsRes = await fetch('http://localhost:5000/api/dashboard/stats', { headers });
+      const statsRes = await fetch(`${import.meta.env.VITE_API_URL}/dashboard/stats`, { headers });
       if (statsRes.ok) {
         const statsData = await statsRes.json();
         setStats(statsData);
       }
 
       // Fetch Status Chart Data
-      const statusRes = await fetch('http://localhost:5000/api/dashboard/status-chart', { headers });
+      const statusRes = await fetch(`${import.meta.env.VITE_API_URL}/dashboard/status-chart`, { headers });
       if (statusRes.ok) {
         const statusChartData = await statusRes.json();
         setStatusData(statusChartData);
       }
 
       // Fetch Submissions Chart Data
-      const submissionsRes = await fetch('http://localhost:5000/api/dashboard/submissions-chart', { headers });
+      const submissionsRes = await fetch(`${import.meta.env.VITE_API_URL}/dashboard/submissions-chart`, { headers });
       if (submissionsRes.ok) {
         const submissionsChartData = await submissionsRes.json();
         setTrendData(submissionsChartData);
       }
 
       // Fetch Recent Submissions
-      const recentSubRes = await fetch('http://localhost:5000/api/dashboard/recent-submissions', { headers });
+      const recentSubRes = await fetch(`${import.meta.env.VITE_API_URL}/dashboard/recent-submissions`, { headers });
       if (recentSubRes.ok) {
         const recentSubData = await recentSubRes.json();
         setRecentSubmissions(recentSubData);
       }
 
       // Fetch Recent Announcements
-      const announcementsRes = await fetch('http://localhost:5000/api/announcements', { headers });
+      const announcementsRes = await fetch(`${import.meta.env.VITE_API_URL}/announcements`, { headers });
       if (announcementsRes.ok) {
         const announcementsData = await announcementsRes.json();
         // Take top 3

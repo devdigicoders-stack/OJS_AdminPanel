@@ -83,7 +83,7 @@ const Journals = () => {
   const fetchJournals = async () => {
     try {
       const token = localStorage.getItem('adminToken');
-      const response = await fetch('http://localhost:5000/api/journals', {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/journals`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       const data = await response.json();
@@ -98,7 +98,7 @@ const Journals = () => {
   const fetchReviewers = async () => {
     try {
       const token = localStorage.getItem('adminToken');
-      const response = await fetch('http://localhost:5000/api/users/reviewers', {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/users/reviewers`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       const data = await response.json();
@@ -117,10 +117,10 @@ const Journals = () => {
       let body = {};
       
       if (modalType === 'reviewer') {
-        url = `http://localhost:5000/api/journals/${selectedJournal._id}/assign`;
+        url = `${import.meta.env.VITE_API_URL}/journals/${selectedJournal._id}/assign`;
         body = { reviewerId: reviewerName }; // reviewerName holds reviewer ID here
       } else if (modalType === 'status') {
-        url = `http://localhost:5000/api/journals/${selectedJournal._id}/status`;
+        url = `${import.meta.env.VITE_API_URL}/journals/${selectedJournal._id}/status`;
         body = { status: newStatus };
       }
 

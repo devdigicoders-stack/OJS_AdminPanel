@@ -19,7 +19,7 @@ const UserDetails = () => {
   const fetchUser = async () => {
     try {
       const token = localStorage.getItem('adminToken');
-      const response = await fetch(`http://localhost:5000/api/users/${id}`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/users/${id}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       const data = await response.json();
@@ -64,7 +64,7 @@ const UserDetails = () => {
           <div className="profile-card hero-card">
             <div className="avatar-large-wrapper">
               {user.profilePic ? (
-                <img src={`http://localhost:5000${user.profilePic}`} alt="Profile" className="avatar-large-img" />
+                <img src={`${import.meta.env.VITE_API_URL.replace('/api', '')}${user.profilePic}`} alt="Profile" className="avatar-large-img" />
               ) : (
                 <div className={`avatar-large ${user.avatarColor || 'blue'}`}>
                   {user.initials || user.name.substring(0, 2).toUpperCase()}

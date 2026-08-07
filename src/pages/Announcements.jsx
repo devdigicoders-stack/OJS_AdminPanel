@@ -30,7 +30,7 @@ const Announcements = () => {
   const fetchAnnouncements = async () => {
     try {
       const token = localStorage.getItem('adminToken');
-      const response = await fetch('http://localhost:5000/api/announcements', {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/announcements`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       if (response.ok) {
@@ -71,7 +71,7 @@ const Announcements = () => {
     
     try {
       if (modalType === 'delete') {
-        const response = await fetch(`http://localhost:5000/api/announcements/${selectedAnn._id}`, {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/announcements/${selectedAnn._id}`, {
           method: 'DELETE',
           headers: { Authorization: `Bearer ${token}` }
         });
@@ -82,7 +82,7 @@ const Announcements = () => {
       } 
       else if (modalType === 'add') {
         if (!formData.title) return toast.error('Title is required');
-        const response = await fetch('http://localhost:5000/api/announcements', {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/announcements`, {
           method: 'POST',
           headers: { 
             'Content-Type': 'application/json',
@@ -97,7 +97,7 @@ const Announcements = () => {
       } 
       else if (modalType === 'edit') {
         if (!formData.title) return toast.error('Title is required');
-        const response = await fetch(`http://localhost:5000/api/announcements/${selectedAnn._id}`, {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/announcements/${selectedAnn._id}`, {
           method: 'PUT',
           headers: { 
             'Content-Type': 'application/json',

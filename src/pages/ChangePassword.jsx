@@ -43,7 +43,7 @@ const ChangePassword = () => {
     
     try {
       const token = localStorage.getItem('adminToken');
-      const response = await fetch('http://localhost:5000/api/auth/change-password', {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/auth/change-password`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
