@@ -5,6 +5,7 @@ import Login from './pages/Login';
 import Users from './pages/Users';
 import Journals from './pages/Journals';
 import JournalDetails from './pages/JournalDetails';
+import UserDetails from './pages/UserDetails';
 import Announcements from './pages/Announcements';
 import Reports from './pages/Reports';
 import Settings from './pages/Settings';
@@ -27,6 +28,7 @@ function App() {
         <Route path="/" element={<Layout />}>
           <Route index element={<Dashboard />} />
           <Route path="users" element={<Users />} />
+          <Route path="users/:id" element={<UserDetails />} />
           <Route path="journals" element={<Journals />} />
           <Route path="journals/:id" element={<JournalDetails />} />
           <Route path="update-status" element={<UpdateStatus />} />

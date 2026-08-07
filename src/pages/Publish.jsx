@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   MdSend,
@@ -13,28 +13,10 @@ import {
 import toast from 'react-hot-toast';
 import './Publish.css';
 
-const initialJournals = [
-  { 
-    id: 'J-2026-003', 
-    title: 'Advanced Calculus Methods', 
-    author: 'Amit Patel',
-    department: 'Mathematics',
-    approvedDate: 'Aug 04, 2026',
-    status: 'Ready to Publish'
-  },
-  { 
-    id: 'J-2026-009', 
-    title: 'Global Warming Effects on Marine Life', 
-    author: 'Dr. Anita Desai',
-    department: 'Environmental Science',
-    approvedDate: 'Aug 05, 2026',
-    status: 'Ready to Publish'
-  }
-];
-
 const Publish = () => {
   const navigate = useNavigate();
-  const [journals, setJournals] = useState(initialJournals);
+  const [journals, setJournals] = useState([]);
+  const [stats, setStats] = useState({ ready: 0, publishedThisMonth: 0, totalPublished: 0 });
   const [searchTerm, setSearchTerm] = useState('');
   const [entriesPerPage, setEntriesPerPage] = useState(10);
   const [currentPage, setCurrentPage] = useState(1);
@@ -49,11 +31,60 @@ const Publish = () => {
     issue: 'Issue 3'
   });
 
+  useEffect(() => {
+    fetchJournals();
+  }, []);
+
+  const fetchJournals = async () => {
+    try {
+      const token = localStorage.getItem('adminToken');
+      const response = await fetch('http://localhost:5000/api/journals', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const data = await response.json();
+      if (response.ok) {
+        let readyCount = 0;
+        let publishedThisMonth = 0;
+        let totalPublished = 0;
+
+        const now = new Date();
+        const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+
+        data.forEach(j => {
+          if (['Reviewed', 'Processed', 'Approved'].includes(j.status)) readyCount++;
+          if (j.status === 'Published') {
+            totalPublished++;
+            const updatedAt = new Date(j.updatedAt || j.createdAt);
+            if (updatedAt >= firstDayOfMonth) publishedThisMonth++;
+          }
+        });
+
+        setStats({ ready: readyCount, publishedThisMonth, totalPublished });
+
+        // Show journals that are ready to publish
+        const readyToPublish = data.filter(j => ['Reviewed', 'Processed', 'Approved'].includes(j.status));
+        
+        const formatted = readyToPublish.map(j => ({
+          _id: j._id,
+          id: j.journalId || j._id.substring(0,8),
+          title: j.title,
+          author: j.primaryAuthorName || (j.primaryAuthorId && j.primaryAuthorId.name) || 'Unknown',
+          department: j.department || 'N/A',
+          approvedDate: new Date(j.updatedAt || Date.now()).toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' }),
+          status: 'Ready to Publish'
+        }));
+        setJournals(formatted);
+      }
+    } catch (error) {
+      toast.error('Failed to load journals');
+    }
+  };
+
   const filteredJournals = useMemo(() => {
     return journals.filter(journal => 
-      journal.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
-      journal.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      journal.author.toLowerCase().includes(searchTerm.toLowerCase())
+      (journal.title || '').toLowerCase().includes(searchTerm.toLowerCase()) || 
+      (journal.id || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (journal.author || '').toLowerCase().includes(searchTerm.toLowerCase())
     );
   }, [journals, searchTerm]);
 
@@ -66,15 +97,37 @@ const Publish = () => {
     setIsModalOpen(true);
   };
 
-  const handleConfirmPublish = () => {
+  const handleConfirmPublish = async () => {
     if (!publishForm.doi.trim()) {
       toast.error('DOI is required for publication.');
       return;
     }
 
-    setJournals(journals.filter(j => j.id !== selectedJournal.id));
-    toast.success(`Journal ${selectedJournal.id} has been successfully Published!`, { icon: '🚀' });
-    setIsModalOpen(false);
+    try {
+      const token = localStorage.getItem('adminToken');
+      const response = await fetch(`http://localhost:5000/api/journals/${selectedJournal._id}/publish`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          doi: publishForm.doi,
+          volume: publishForm.volume,
+          issue: publishForm.issue
+        })
+      });
+
+      if (response.ok) {
+        toast.success(`Journal ${selectedJournal.id} has been successfully Published!`, { icon: '🚀' });
+        setIsModalOpen(false);
+        fetchJournals();
+      } else {
+        toast.error('Failed to publish journal.');
+      }
+    } catch (error) {
+      toast.error('Server connection error.');
+    }
   };
 
   return (
@@ -89,21 +142,21 @@ const Publish = () => {
           <div className="stat-icon-wrap blue"><MdSend /></div>
           <div className="stat-content">
             <p>Ready to Publish</p>
-            <h3>{journals.length}</h3>
+            <h3>{stats.ready}</h3>
           </div>
         </div>
         <div className="stat-card stat-anim" style={{animationDelay: '0.1s'}}>
           <div className="stat-icon-wrap green"><MdOutlinePublic /></div>
           <div className="stat-content">
             <p>Published This Month</p>
-            <h3>45</h3>
+            <h3>{stats.publishedThisMonth}</h3>
           </div>
         </div>
         <div className="stat-card stat-anim" style={{animationDelay: '0.2s'}}>
           <div className="stat-icon-wrap purple"><MdCheckCircle /></div>
           <div className="stat-content">
             <p>Total Published</p>
-            <h3>1,204</h3>
+            <h3>{stats.totalPublished}</h3>
           </div>
         </div>
       </div>
@@ -155,7 +208,7 @@ const Publish = () => {
                   </td>
                   <td>
                     <div className="action-buttons-ar">
-                      <button className="btn-ar-action view" title="View Details" onClick={() => navigate(`/journals/${journal.id}`)}>
+                      <button className="btn-ar-action view" title="View Details" onClick={() => navigate(`/journals/${journal._id}`)}>
                         <MdOutlineRemoveRedEye /> View
                       </button>
                       <button className="btn-ar-action publish-btn" title="Publish" onClick={() => handleActionClick(journal)}>

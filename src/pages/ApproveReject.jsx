@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   MdFactCheck,
@@ -12,43 +12,13 @@ import {
 import toast from 'react-hot-toast';
 import './ApproveReject.css';
 
-const initialJournals = [
-  { 
-    id: 'J-2026-001', 
-    title: 'AI in Healthcare: A Systematic Review', 
-    author: 'Dr. Rahul Sharma',
-    department: 'Computer Science',
-    date: 'Aug 01, 2026',
-    reviewer: 'Dr. Alan Turing',
-    score: '92/100',
-    status: 'Pending Decision'
-  },
-  { 
-    id: 'J-2026-005', 
-    title: 'Machine Learning in Finance', 
-    author: 'James Wilson',
-    department: 'Economics',
-    date: 'Aug 10, 2026',
-    reviewer: 'Dr. Marie Curie',
-    score: '65/100',
-    status: 'Pending Decision'
-  },
-  { 
-    id: 'J-2026-008', 
-    title: 'Cognitive Behavioral Therapy Efficacy', 
-    author: 'Dr. Sarah Lee',
-    department: 'Psychology',
-    date: 'Aug 15, 2026',
-    reviewer: 'Dr. Isaac Newton',
-    score: '88/100',
-    status: 'Pending Decision'
-  }
-];
-
 const ApproveReject = () => {
   const navigate = useNavigate();
-  const [journals, setJournals] = useState(initialJournals);
+  const [journals, setJournals] = useState([]);
+  const [stats, setStats] = useState({ pending: 0, approved: 0, rejected: 0 });
   const [searchTerm, setSearchTerm] = useState('');
+  const [dateFilter, setDateFilter] = useState('All Time');
+  const [showDateFilter, setShowDateFilter] = useState(false);
   const [entriesPerPage, setEntriesPerPage] = useState(10);
   const [currentPage, setCurrentPage] = useState(1);
   
@@ -57,13 +27,80 @@ const ApproveReject = () => {
   const [selectedJournal, setSelectedJournal] = useState(null);
   const [rejectReason, setRejectReason] = useState('');
 
+  useEffect(() => {
+    fetchJournals();
+  }, []);
+
+  const fetchJournals = async () => {
+    try {
+      const token = localStorage.getItem('adminToken');
+      const response = await fetch('http://localhost:5000/api/journals', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const data = await response.json();
+      if (response.ok) {
+        const now = new Date();
+        const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+
+        let approvedCount = 0;
+        let rejectedCount = 0;
+
+        data.forEach(j => {
+          const updatedAt = new Date(j.updatedAt || j.createdAt);
+          if (updatedAt >= oneWeekAgo) {
+            if (j.status === 'Approved') approvedCount++;
+            if (j.status === 'Rejected') rejectedCount++;
+          }
+        });
+
+        // Only show journals that need approval/rejection (e.g. not already Approved/Rejected/Published)
+        const pending = data.filter(j => 
+          !['Approved', 'Rejected', 'Published'].includes(j.status)
+        );
+        
+        setStats({
+          pending: pending.length,
+          approved: approvedCount,
+          rejected: rejectedCount
+        });
+
+        const formatted = pending.map(j => ({
+          _id: j._id,
+          id: j.journalId,
+          title: j.title,
+          author: j.primaryAuthorName || (j.primaryAuthorId && j.primaryAuthorId.name) || 'Unknown',
+          department: j.department || 'N/A',
+          date: new Date(j.createdAt).toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' }),
+          reviewer: (j.assignedReviewer && j.assignedReviewer.name) || 'Not Assigned',
+          score: j.reviewerFeedback ? 'Evaluated' : 'Pending',
+          status: j.status
+        }));
+        setJournals(formatted);
+      }
+    } catch (error) {
+      toast.error('Failed to load journals');
+    }
+  };
+
   const filteredJournals = useMemo(() => {
-    return journals.filter(journal => 
-      journal.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
-      journal.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      journal.author.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-  }, [journals, searchTerm]);
+    return journals.filter(journal => {
+      const matchSearch = (journal.title || '').toLowerCase().includes(searchTerm.toLowerCase()) || 
+                          (journal.id || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+                          (journal.author || '').toLowerCase().includes(searchTerm.toLowerCase());
+                          
+      let matchDate = true;
+      if (dateFilter !== 'All Time') {
+        const jDate = new Date(journal.date);
+        const now = new Date();
+        const diffTime = Math.abs(now - jDate);
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        if (dateFilter === 'Last 7 Days') matchDate = diffDays <= 7;
+        if (dateFilter === 'Last 30 Days') matchDate = diffDays <= 30;
+      }
+
+      return matchSearch && matchDate;
+    });
+  }, [journals, searchTerm, dateFilter]);
 
   const totalPages = Math.ceil(filteredJournals.length / entriesPerPage);
   const currentJournals = filteredJournals.slice((currentPage - 1) * entriesPerPage, currentPage * entriesPerPage);
@@ -75,21 +112,43 @@ const ApproveReject = () => {
     setIsModalOpen(true);
   };
 
-  const handleConfirm = () => {
+  const handleConfirm = async () => {
     if (modalType === 'reject' && !rejectReason.trim()) {
       toast.error('Please provide a reason for rejection.');
       return;
     }
 
-    setJournals(journals.filter(j => j.id !== selectedJournal.id));
-    
-    if (modalType === 'approve') {
-      toast.success(`Journal ${selectedJournal.id} has been Approved!`);
-    } else {
-      toast.success(`Journal ${selectedJournal.id} rejected. Reason sent to author.`);
+    try {
+      const token = localStorage.getItem('adminToken');
+      const newStatus = modalType === 'approve' ? 'Approved' : 'Rejected';
+      
+      const response = await fetch(`http://localhost:5000/api/journals/${selectedJournal._id}/status`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ 
+          status: newStatus,
+          // If the backend is ever updated to save a rejection reason, we pass it here
+          reason: modalType === 'reject' ? rejectReason : undefined 
+        })
+      });
+
+      if (response.ok) {
+        if (modalType === 'approve') {
+          toast.success(`Journal ${selectedJournal.id} has been Approved!`);
+        } else {
+          toast.success(`Journal ${selectedJournal.id} rejected. Reason sent to author.`);
+        }
+        setIsModalOpen(false);
+        fetchJournals();
+      } else {
+        toast.error('Failed to update journal decision.');
+      }
+    } catch (error) {
+      toast.error('Server connection error.');
     }
-    
-    setIsModalOpen(false);
   };
 
   return (
@@ -104,21 +163,21 @@ const ApproveReject = () => {
           <div className="stat-icon-wrap blue"><MdFactCheck /></div>
           <div className="stat-content">
             <p>Pending Decisions</p>
-            <h3>{journals.length}</h3>
+            <h3>{stats.pending}</h3>
           </div>
         </div>
         <div className="stat-card stat-anim" style={{animationDelay: '0.1s'}}>
           <div className="stat-icon-wrap green"><MdCheckCircle /></div>
           <div className="stat-content">
             <p>Approved This Week</p>
-            <h3>24</h3>
+            <h3>{stats.approved}</h3>
           </div>
         </div>
         <div className="stat-card stat-anim" style={{animationDelay: '0.2s'}}>
           <div className="stat-icon-wrap red"><MdCancel /></div>
           <div className="stat-content">
             <p>Rejected This Week</p>
-            <h3>7</h3>
+            <h3>{stats.rejected}</h3>
           </div>
         </div>
       </div>
@@ -136,7 +195,29 @@ const ApproveReject = () => {
                 onChange={(e) => { setSearchTerm(e.target.value); setCurrentPage(1); }}
               />
             </div>
-            <button className="btn-filter"><MdFilterList /> Filter by Date</button>
+            <div style={{ position: 'relative' }}>
+              <button 
+                className="btn-filter" 
+                onClick={() => setShowDateFilter(!showDateFilter)}
+              >
+                <MdFilterList /> {dateFilter === 'All Time' ? 'Filter by Date' : dateFilter}
+              </button>
+              {showDateFilter && (
+                <div className="filter-dropdown" style={{ position: 'absolute', top: '100%', right: 0, background: 'white', border: '1px solid #f3f4f6', borderRadius: '8px', zIndex: 10, minWidth: '160px', boxShadow: '0 4px 12px rgba(0,0,0,0.1)', padding: '8px 0', overflow: 'hidden' }}>
+                  {['All Time', 'Last 7 Days', 'Last 30 Days'].map(opt => (
+                    <div 
+                      key={opt} 
+                      onClick={() => { setDateFilter(opt); setShowDateFilter(false); setCurrentPage(1); }}
+                      style={{ padding: '8px 16px', cursor: 'pointer', fontSize: '14px', color: dateFilter === opt ? '#2563eb' : '#374151', background: dateFilter === opt ? '#eff6ff' : 'transparent', fontWeight: dateFilter === opt ? '600' : '400' }}
+                      onMouseEnter={(e) => { if (dateFilter !== opt) e.target.style.background = '#f9fafb'; }}
+                      onMouseLeave={(e) => { if (dateFilter !== opt) e.target.style.background = 'transparent'; }}
+                    >
+                      {opt}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
@@ -170,7 +251,7 @@ const ApproveReject = () => {
                   </td>
                   <td>
                     <div className="action-buttons-ar">
-                      <button className="btn-ar-action view" title="View Details" onClick={() => navigate(`/journals/${journal.id}`)}>
+                      <button className="btn-ar-action view" title="View Details" onClick={() => navigate(`/journals/${journal._id}`)}>
                         <MdOutlineRemoveRedEye /> View
                       </button>
                       <button className="btn-ar-action approve" title="Approve" onClick={() => handleActionClick('approve', journal)}>

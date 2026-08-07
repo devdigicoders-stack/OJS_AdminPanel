@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { MdArrowBack, MdDownload, MdCheckCircle, MdCancel, MdPublish } from 'react-icons/md';
 import Swal from 'sweetalert2';
@@ -8,54 +8,91 @@ import './JournalDetails.css';
 const JournalDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [status, setStatus] = useState('Reviewed');
+  const [status, setStatus] = useState('Pending Review');
+  const [journal, setJournal] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  const journal = {
-    id: id || 'J-2026-001',
-    title: 'AI in Healthcare: A Comprehensive Study on Predictive Models',
-    abstract: 'This paper explores the application of artificial intelligence in predicting patient outcomes in ICU settings...',
-    keywords: 'AI, Healthcare, Machine Learning, Predictive Modeling',
-    department: 'Computer Science',
-    author: {
-      name: 'Dr. Rahul Sharma',
-      email: 'rahul.s@university.edu',
-      institution: 'Delhi University'
-    },
-    files: [
-      { name: 'Research_Paper_Final.pdf', size: '2.4 MB' },
-      { name: 'Supplementary_Data.zip', size: '15.1 MB' }
-    ],
-    reviews: [
-      { reviewer: 'Dr. Alan Turing', comment: 'Methodology is solid. Needs better formatting.', date: '2026-08-03' },
-      { reviewer: 'Dr. Marie Curie', comment: 'Excellent analysis of the datasets.', date: '2026-08-04' }
-    ]
+  useEffect(() => {
+    const fetchJournal = async () => {
+      try {
+        const token = localStorage.getItem('adminToken');
+        const res = await fetch(`http://localhost:5000/api/journals/${id}`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (res.ok) {
+          const data = await res.json();
+          setJournal(data);
+          setStatus(data.status);
+        } else {
+          toast.error('Failed to fetch journal details');
+        }
+      } catch (error) {
+        toast.error('An error occurred while fetching journal details');
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchJournal();
+  }, [id]);
+
+  if (loading) {
+    return <div style={{ padding: '20px' }}>Loading...</div>;
+  }
+
+  if (!journal) {
+    return <div style={{ padding: '20px' }}>Journal not found.</div>;
+  }
+
+  const updateBackendStatus = async (newStatus, extraData = {}) => {
+    try {
+      const token = localStorage.getItem('adminToken');
+      const url = newStatus === 'Published' 
+        ? `http://localhost:5000/api/journals/${id}/publish` 
+        : `http://localhost:5000/api/journals/${id}/status`;
+      
+      const bodyData = newStatus === 'Published' ? extraData : { status: newStatus, ...extraData };
+
+      const res = await fetch(url, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(bodyData)
+      });
+      if (res.ok) {
+        setStatus(newStatus);
+        return true;
+      }
+      return false;
+    } catch (e) {
+      return false;
+    }
   };
 
-  const handleStatusChange = (e) => {
+  const handleStatusChange = async (e) => {
     const newStatus = e.target.value;
-    setStatus(newStatus);
-    toast.success(`Status updated to ${newStatus}`);
+    const success = await updateBackendStatus(newStatus);
+    if (success) {
+      toast.success(`Status updated to ${newStatus}`);
+    } else {
+      toast.error('Failed to update status');
+    }
   };
 
   const handleApprove = () => {
     Swal.fire({
       title: 'Approve Journal',
-      html: `
-        <input type="text" id="doi" class="swal2-input" placeholder="Assign DOI Number">
-        <input type="text" id="vol" class="swal2-input" placeholder="Publication Volume">
-      `,
+      text: 'Are you sure you want to approve this journal? It will be ready for publication.',
+      icon: 'question',
       showCancelButton: true,
-      confirmButtonText: 'Approve',
-      preConfirm: () => {
-        return {
-          doi: document.getElementById('doi').value,
-          vol: document.getElementById('vol').value
-        }
-      }
-    }).then((result) => {
+      confirmButtonText: 'Yes, Approve',
+      confirmButtonColor: '#38a169'
+    }).then(async (result) => {
       if (result.isConfirmed) {
-        setStatus('Approved');
-        toast.success('Journal Approved successfully!');
+        const success = await updateBackendStatus('Approved');
+        if (success) toast.success('Journal Approved successfully!');
+        else toast.error('Failed to approve journal');
       }
     });
   };
@@ -68,10 +105,11 @@ const JournalDetails = () => {
       showCancelButton: true,
       confirmButtonText: 'Reject',
       confirmButtonColor: '#e53e3e'
-    }).then((result) => {
+    }).then(async (result) => {
       if (result.isConfirmed) {
-        setStatus('Rejected');
-        toast.error('Journal Rejected and author notified.');
+        const success = await updateBackendStatus('Rejected');
+        if (success) toast.error('Journal Rejected and author notified.');
+        else toast.error('Failed to reject journal');
       }
     });
   };
@@ -84,10 +122,11 @@ const JournalDetails = () => {
       showCancelButton: true,
       confirmButtonText: 'Publish Now',
       confirmButtonColor: '#38a169'
-    }).then((result) => {
+    }).then(async (result) => {
       if (result.isConfirmed) {
-        setStatus('Published');
-        toast.success('Journal Published successfully!');
+        const success = await updateBackendStatus('Published', { publishDate: new Date() });
+        if (success) toast.success('Journal Published successfully!');
+        else toast.error('Failed to publish journal');
       }
     });
   };
@@ -118,7 +157,7 @@ const JournalDetails = () => {
             <div className="info-row">
               <div className="info-group">
                 <label>Keywords</label>
-                <p>{journal.keywords}</p>
+                <p>{journal.keywords?.join(', ')}</p>
               </div>
               <div className="info-group">
                 <label>Department</label>
@@ -130,22 +169,20 @@ const JournalDetails = () => {
           <div className="detail-card">
             <h3>Files</h3>
             <ul className="file-list">
-              {journal.files.map((file, idx) => (
-                <li key={idx}>
-                  <div className="file-info">
-                    <strong>{file.name}</strong>
-                    <span>{file.size}</span>
-                  </div>
-                  <button className="download-btn"><MdDownload /> Download</button>
-                </li>
-              ))}
+              <li>
+                <div className="file-info">
+                  <strong>Main Manuscript</strong>
+                  <span>{journal.mainFilePath || 'Not uploaded'}</span>
+                </div>
+                <button className="download-btn"><MdDownload /> Download</button>
+              </li>
             </ul>
           </div>
 
           <div className="detail-card">
             <h3>Review History</h3>
             <div className="timeline">
-              {journal.reviews.map((rev, idx) => (
+              {journal.reviews && journal.reviews.length > 0 ? journal.reviews.map((rev, idx) => (
                 <div className="timeline-item" key={idx}>
                   <div className="timeline-dot"></div>
                   <div className="timeline-content">
@@ -153,7 +190,9 @@ const JournalDetails = () => {
                     <p>{rev.comment}</p>
                   </div>
                 </div>
-              ))}
+              )) : (
+                <p style={{color: '#666'}}>No review history available.</p>
+              )}
             </div>
           </div>
         </div>
@@ -186,11 +225,11 @@ const JournalDetails = () => {
           <div className="detail-card">
             <h3>Author Details</h3>
             <div className="author-info">
-              <img src={`https://ui-avatars.com/api/?name=${journal.author.name.replace(' ', '+')}&background=random`} alt="Author" className="avatar-large" />
+              <img src={`https://ui-avatars.com/api/?name=${(journal.primaryAuthorName || 'A').replace(/ /g, '+')}&background=random`} alt="Author" className="avatar-large" />
               <div>
-                <strong>{journal.author.name}</strong>
-                <p>{journal.author.email}</p>
-                <p className="institution">{journal.author.institution}</p>
+                <strong>{journal.primaryAuthorName}</strong>
+                <p>{journal.email}</p>
+                <p className="institution">Department of {journal.department}</p>
               </div>
             </div>
           </div>

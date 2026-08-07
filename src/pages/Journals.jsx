@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   MdLibraryBooks, 
@@ -17,18 +17,10 @@ import {
 import toast from 'react-hot-toast';
 import './Journals.css'; 
 
-const initialJournals = [
-  { id: 'J-2026-001', title: 'AI in Healthcare: A Systematic Review', author: 'Dr. Rahul Sharma', department: 'Computer Science', date: 'Aug 01, 2026', status: 'Pending Review', doi: '10.1234/ai.2026' },
-  { id: 'J-2026-002', title: 'Quantum Computing Dynamics', author: 'Priya Verma', department: 'Physics', date: 'Aug 02, 2026', status: 'Reviewed', doi: '10.1234/qc.2026' },
-  { id: 'J-2026-003', title: 'Advanced Calculus Methods', author: 'Amit Patel', department: 'Mathematics', date: 'Aug 04, 2026', status: 'Published', doi: '10.1234/math.2026' },
-  { id: 'J-2026-004', title: 'Sustainable Energy Transitions', author: 'Dr. Sarah Johnson', department: 'Environmental', date: 'Aug 05, 2026', status: 'Rejected', doi: '-' },
-  { id: 'J-2026-005', title: 'Machine Learning in Finance', author: 'James Wilson', department: 'Economics', date: 'Aug 10, 2026', status: 'Pending Review', doi: '-' },
-  { id: 'J-2026-006', title: 'Neural Networks Architecture', author: 'Dr. Emily Davis', department: 'Computer Science', date: 'Aug 12, 2026', status: 'Published', doi: '10.1234/nn.2026' },
-];
-
 const Journals = () => {
   const navigate = useNavigate();
-  const [journals, setJournals] = useState(initialJournals);
+  const [journals, setJournals] = useState([]);
+  const [reviewers, setReviewers] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [activeTab, setActiveTab] = useState('All Journals');
   const [entriesPerPage, setEntriesPerPage] = useState(10);
@@ -44,9 +36,9 @@ const Journals = () => {
   // Filtering Logic
   const filteredJournals = useMemo(() => {
     return journals.filter(journal => {
-      const matchesSearch = journal.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                            journal.author.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                            journal.id.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesSearch = (journal.title || '').toLowerCase().includes(searchTerm.toLowerCase()) || 
+                            (journal.primaryAuthorName || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+                            (journal.journalId || '').toLowerCase().includes(searchTerm.toLowerCase());
       
       let matchesTab = true;
       if (activeTab === 'Published') matchesTab = journal.status === 'Published';
@@ -83,12 +75,73 @@ const Journals = () => {
     setReviewerName('');
   };
 
-  const handleConfirmAction = () => {
-    if (modalType === 'reviewer') {
-      toast.success(`Reviewer ${reviewerName} assigned successfully to ${selectedJournal.id}!`);
-    } else if (modalType === 'status') {
-      setJournals(journals.map(j => j.id === selectedJournal.id ? { ...j, status: newStatus } : j));
-      toast.success(`Journal ${selectedJournal.id} status updated to ${newStatus}`);
+  useEffect(() => {
+    fetchJournals();
+    fetchReviewers();
+  }, []);
+
+  const fetchJournals = async () => {
+    try {
+      const token = localStorage.getItem('adminToken');
+      const response = await fetch('http://localhost:5000/api/journals', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const data = await response.json();
+      if (response.ok) {
+        setJournals(data);
+      }
+    } catch (error) {
+      toast.error('Failed to fetch journals');
+    }
+  };
+
+  const fetchReviewers = async () => {
+    try {
+      const token = localStorage.getItem('adminToken');
+      const response = await fetch('http://localhost:5000/api/users/reviewers', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const data = await response.json();
+      if (response.ok) {
+        setReviewers(data);
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const handleConfirmAction = async () => {
+    try {
+      const token = localStorage.getItem('adminToken');
+      let url = '';
+      let body = {};
+      
+      if (modalType === 'reviewer') {
+        url = `http://localhost:5000/api/journals/${selectedJournal._id}/assign`;
+        body = { reviewerId: reviewerName }; // reviewerName holds reviewer ID here
+      } else if (modalType === 'status') {
+        url = `http://localhost:5000/api/journals/${selectedJournal._id}/status`;
+        body = { status: newStatus };
+      }
+
+      const response = await fetch(url, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(body)
+      });
+
+      const data = await response.json();
+      if (response.ok) {
+        toast.success(modalType === 'reviewer' ? 'Reviewer assigned successfully!' : `Status updated to ${newStatus}`);
+        fetchJournals(); 
+      } else {
+        toast.error(data.message || 'Action failed');
+      }
+    } catch (error) {
+      toast.error('Action failed due to server error');
     }
     handleCloseModal();
   };
@@ -180,16 +233,16 @@ const Journals = () => {
             </thead>
             <tbody>
               {currentJournals.length > 0 ? currentJournals.map((journal, index) => (
-                <tr key={journal.id} className="table-row-animate" style={{ animationDelay: `${index * 0.05}s` }}>
-                  <td><strong>{journal.id}</strong></td>
+                <tr key={journal._id} className="table-row-animate" style={{ animationDelay: `${index * 0.05}s` }}>
+                  <td><strong>{journal.journalId}</strong></td>
                   <td>
                     <div className="journal-title-cell">
                       {journal.title}
                     </div>
                   </td>
-                  <td className="author-cell">{journal.author}</td>
+                  <td className="author-cell">{journal.primaryAuthorName}</td>
                   <td>{journal.department}</td>
-                  <td className="date-cell">{journal.date}</td>
+                  <td className="date-cell">{new Date(journal.createdAt).toLocaleDateString()}</td>
                   <td>
                     <span className={`status-badge-j ${journal.status.replace(' ', '-').toLowerCase()}`}>
                       {journal.status}
@@ -197,7 +250,7 @@ const Journals = () => {
                   </td>
                   <td>
                     <div className="action-buttons">
-                      <button className="action-btn view" title="View Details" onClick={() => navigate(`/journals/${journal.id}`)}><MdOutlineRemoveRedEye /></button>
+                      <button className="action-btn view" title="View Details" onClick={() => navigate(`/journals/${journal._id}`)}><MdOutlineRemoveRedEye /></button>
                       <button className="action-btn download" title="Download PDF"><MdFileDownload /></button>
                       
                       <div className="divider"></div>
@@ -272,12 +325,12 @@ const Journals = () => {
             <div className="modal-body">
               {modalType === 'reviewer' ? (
                 <div className="form-group">
-                  <label>Select Reviewer for {selectedJournal?.id}</label>
+                  <label>Select Reviewer for {selectedJournal?.journalId}</label>
                   <select value={reviewerName} onChange={(e) => setReviewerName(e.target.value)}>
                     <option value="">-- Choose Reviewer --</option>
-                    <option value="Dr. Alan Turing">Dr. Alan Turing</option>
-                    <option value="Dr. Marie Curie">Dr. Marie Curie</option>
-                    <option value="Dr. Isaac Newton">Dr. Isaac Newton</option>
+                    {reviewers.map(rev => (
+                      <option key={rev._id} value={rev._id}>{rev.name} ({rev.department})</option>
+                    ))}
                   </select>
                 </div>
               ) : (

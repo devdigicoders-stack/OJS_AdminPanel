@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   MdOutlineSecurity, 
-  MdPersonOutline, 
+  MdOutlineEmail, 
   MdLockOutline, 
   MdVisibilityOff, 
   MdVisibility, 
@@ -14,11 +14,38 @@ import './Login.css';
 const Login = () => {
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
-    toast.success('Logged in successfully!');
-    navigate('/');
+    setLoading(true);
+
+    try {
+      const response = await fetch('http://localhost:5000/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ email, password })
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        toast.success('Logged in successfully!');
+        localStorage.setItem('adminToken', data.token);
+        localStorage.setItem('adminUser', JSON.stringify(data.user));
+        navigate('/');
+      } else {
+        toast.error(data.message || 'Login failed');
+      }
+    } catch (error) {
+      toast.error('An error occurred. Please try again later.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -51,7 +78,7 @@ const Login = () => {
                 <span className="dot"></span><span className="dot"></span><span className="dot"></span>
               </div>
               <div className="ill-screen-body">
-                <div className="ill-profile"><MdPersonOutline /></div>
+                <div className="ill-profile"><MdOutlineEmail /></div>
                 <div className="ill-lines">
                   <div className="ill-line w-full"></div>
                   <div className="ill-line w-half"></div>
@@ -77,10 +104,16 @@ const Login = () => {
             
             <form onSubmit={handleLogin} className="login-form">
               <div className="input-group">
-                <label>Username</label>
+                <label>Email Address</label>
                 <div className="input-with-icon">
-                  <MdPersonOutline className="input-icon" />
-                  <input type="text" placeholder="Enter your username" required />
+                  <MdOutlineEmail className="input-icon" />
+                  <input 
+                    type="email" 
+                    placeholder="Enter your email" 
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required 
+                  />
                 </div>
               </div>
 
@@ -91,6 +124,8 @@ const Login = () => {
                   <input 
                     type={showPassword ? "text" : "password"} 
                     placeholder="Enter your password" 
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
                     required 
                   />
                   <button 
@@ -111,9 +146,9 @@ const Login = () => {
                 <a href="#" className="forgot-link">Forgot Password?</a>
               </div>
 
-              <button type="submit" className="btn-login">
+              <button type="submit" className="btn-login" disabled={loading}>
                 <MdLogin className="btn-login-icon" />
-                Login
+                {loading ? 'Logging in...' : 'Login'}
               </button>
             </form>
 

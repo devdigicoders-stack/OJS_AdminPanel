@@ -1,10 +1,10 @@
 import React, { useState, useMemo } from 'react';
-import { 
-  MdCampaign, 
-  MdAdd, 
-  MdEdit, 
-  MdDeleteOutline, 
-  MdSearch, 
+import {
+  MdCampaign,
+  MdAdd,
+  MdEdit,
+  MdDeleteOutline,
+  MdSearch,
   MdFilterList,
   MdClose,
   MdOutlineAccessTime,
@@ -13,25 +13,38 @@ import {
 import toast from 'react-hot-toast';
 import './Announcements.css';
 
-const initialAnnouncements = [
-  { id: 'ANN-001', title: 'Call for Papers: Special Issue on AI', category: 'General', publishDate: 'Aug 01, 2026', expiryDate: 'Oct 01, 2026', status: 'Published' },
-  { id: 'ANN-002', title: 'System Maintenance Downtime', category: 'Alert', publishDate: 'Aug 10, 2026', expiryDate: 'Aug 11, 2026', status: 'Draft' },
-  { id: 'ANN-003', title: 'New Peer Review Guidelines', category: 'News', publishDate: 'Jul 15, 2026', expiryDate: 'Dec 31, 2026', status: 'Published' }
-];
-
 const Announcements = () => {
-  const [announcements, setAnnouncements] = useState(initialAnnouncements);
+  const [announcements, setAnnouncements] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
-  
+
   // Modal States
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalType, setModalType] = useState(''); // 'add', 'edit', 'delete'
   const [selectedAnn, setSelectedAnn] = useState(null);
-  const [formData, setFormData] = useState({ title: '', category: 'General', expiryDate: '' });
+  const [formData, setFormData] = useState({ title: '', category: 'General', expiryDate: '', status: 'Draft' });
+
+  React.useEffect(() => {
+    fetchAnnouncements();
+  }, []);
+
+  const fetchAnnouncements = async () => {
+    try {
+      const token = localStorage.getItem('adminToken');
+      const response = await fetch('http://localhost:5000/api/announcements', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setAnnouncements(data);
+      }
+    } catch (error) {
+      toast.error('Failed to load announcements');
+    }
+  };
 
   const filteredAnn = useMemo(() => {
-    return announcements.filter(a => 
-      a.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
+    return announcements.filter(a =>
+      a.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       a.category.toLowerCase().includes(searchTerm.toLowerCase())
     );
   }, [announcements, searchTerm]);
@@ -40,38 +53,71 @@ const Announcements = () => {
     setModalType(type);
     setSelectedAnn(ann);
     if (type === 'edit' && ann) {
-      setFormData({ title: ann.title, category: ann.category, expiryDate: ann.expiryDate });
+      setFormData({ 
+        title: ann.title, 
+        category: ann.category, 
+        expiryDate: ann.expiryDate ? new Date(ann.expiryDate).toISOString().split('T')[0] : '',
+        status: ann.status 
+      });
     } else {
-      setFormData({ title: '', category: 'General', expiryDate: '' });
+      setFormData({ title: '', category: 'General', expiryDate: '', status: 'Draft' });
     }
     setIsModalOpen(true);
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (modalType === 'delete') {
-      setAnnouncements(announcements.filter(a => a.id !== selectedAnn.id));
-      toast.success('Announcement deleted successfully!');
-    } else if (modalType === 'add') {
-      if (!formData.title) return toast.error('Title is required');
-      const newAnn = {
-        id: `ANN-00${announcements.length + 4}`,
-        ...formData,
-        publishDate: 'Just now',
-        status: 'Draft'
-      };
-      setAnnouncements([newAnn, ...announcements]);
-      toast.success('New announcement drafted!');
-    } else if (modalType === 'edit') {
-      if (!formData.title) return toast.error('Title is required');
-      setAnnouncements(announcements.map(a => a.id === selectedAnn.id ? { ...a, ...formData } : a));
-      toast.success('Announcement updated!');
+  const handleSubmit = async (e) => {
+    if (e) e.preventDefault();
+    const token = localStorage.getItem('adminToken');
+    
+    try {
+      if (modalType === 'delete') {
+        const response = await fetch(`http://localhost:5000/api/announcements/${selectedAnn._id}`, {
+          method: 'DELETE',
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        if (response.ok) {
+          toast.success('Announcement deleted successfully!');
+          fetchAnnouncements();
+        } else toast.error('Failed to delete announcement');
+      } 
+      else if (modalType === 'add') {
+        if (!formData.title) return toast.error('Title is required');
+        const response = await fetch('http://localhost:5000/api/announcements', {
+          method: 'POST',
+          headers: { 
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}` 
+          },
+          body: JSON.stringify(formData)
+        });
+        if (response.ok) {
+          toast.success('New announcement created!');
+          fetchAnnouncements();
+        } else toast.error('Failed to create announcement');
+      } 
+      else if (modalType === 'edit') {
+        if (!formData.title) return toast.error('Title is required');
+        const response = await fetch(`http://localhost:5000/api/announcements/${selectedAnn._id}`, {
+          method: 'PUT',
+          headers: { 
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}` 
+          },
+          body: JSON.stringify(formData)
+        });
+        if (response.ok) {
+          toast.success('Announcement updated!');
+          fetchAnnouncements();
+        } else toast.error('Failed to update announcement');
+      }
+      setIsModalOpen(false);
+    } catch (error) {
+      toast.error('Server error');
     }
-    setIsModalOpen(false);
   };
 
   const getCategoryColor = (category) => {
-    switch(category) {
+    switch (category) {
       case 'Alert': return 'red';
       case 'News': return 'blue';
       default: return 'purple';
@@ -93,14 +139,14 @@ const Announcements = () => {
             <h3>{announcements.length}</h3>
           </div>
         </div>
-        <div className="stat-card stat-anim" style={{animationDelay: '0.1s'}}>
+        <div className="stat-card stat-anim" style={{ animationDelay: '0.1s' }}>
           <div className="stat-icon-wrap green"><MdCheckCircle /></div>
           <div className="stat-content">
             <p>Active / Published</p>
             <h3>{announcements.filter(a => a.status === 'Published').length}</h3>
           </div>
         </div>
-        <div className="stat-card stat-anim" style={{animationDelay: '0.2s'}}>
+        <div className="stat-card stat-anim" style={{ animationDelay: '0.2s' }}>
           <div className="stat-icon-wrap orange"><MdOutlineAccessTime /></div>
           <div className="stat-content">
             <p>Drafts</p>
@@ -115,9 +161,9 @@ const Announcements = () => {
           <div className="table-controls">
             <div className="search-box">
               <MdSearch className="search-icon" />
-              <input 
-                type="text" 
-                placeholder="Search announcements..." 
+              <input
+                type="text"
+                placeholder="Search announcements..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
@@ -142,10 +188,10 @@ const Announcements = () => {
             </thead>
             <tbody>
               {filteredAnn.length > 0 ? filteredAnn.map((ann, index) => (
-                <tr key={ann.id} className="table-row-animate" style={{ animationDelay: `${index * 0.05}s` }}>
+                <tr key={ann._id} className="table-row-animate" style={{ animationDelay: `${index * 0.05}s` }}>
                   <td>
                     <div className="ann-title-cell">
-                      <span className="ann-id">{ann.id}</span>
+                      <span className="ann-id">{ann.announcementId}</span>
                       <span className="ann-title">{ann.title}</span>
                     </div>
                   </td>
@@ -154,8 +200,8 @@ const Announcements = () => {
                       {ann.category}
                     </span>
                   </td>
-                  <td>{ann.publishDate}</td>
-                  <td>{ann.expiryDate}</td>
+                  <td>{ann.publishDate ? new Date(ann.publishDate).toLocaleDateString() : 'N/A'}</td>
+                  <td>{ann.expiryDate ? new Date(ann.expiryDate).toLocaleDateString() : 'N/A'}</td>
                   <td>
                     <span className={`status-badge-inline ${ann.status === 'Published' ? 'green' : 'yellow'}`}>
                       {ann.status}
@@ -188,13 +234,13 @@ const Announcements = () => {
           <div className="modal-content" onClick={e => e.stopPropagation()}>
             <div className="modal-header">
               <h2>
-                {modalType === 'add' ? 'Create Announcement' : 
-                 modalType === 'edit' ? 'Edit Announcement' : 'Delete Announcement'}
+                {modalType === 'add' ? 'Create Announcement' :
+                  modalType === 'edit' ? 'Edit Announcement' : 'Delete Announcement'}
               </h2>
               <button className="close-btn" onClick={() => setIsModalOpen(false)}><MdClose /></button>
             </div>
             <div className="modal-body">
-              
+
               {modalType === 'delete' ? (
                 <div className="delete-confirm">
                   <div className="delete-icon-large"><MdDeleteOutline /></div>
@@ -205,20 +251,20 @@ const Announcements = () => {
                 <form id="annForm" onSubmit={handleSubmit} className="ann-form">
                   <div className="form-group">
                     <label>Announcement Title</label>
-                    <input 
-                      type="text" 
-                      placeholder="e.g. System Maintenance" 
+                    <input
+                      type="text"
+                      placeholder="e.g. System Maintenance"
                       value={formData.title}
-                      onChange={e => setFormData({...formData, title: e.target.value})}
+                      onChange={e => setFormData({ ...formData, title: e.target.value })}
                       autoFocus
                     />
                   </div>
                   <div className="form-row">
                     <div className="form-group">
                       <label>Category</label>
-                      <select 
+                      <select
                         value={formData.category}
-                        onChange={e => setFormData({...formData, category: e.target.value})}
+                        onChange={e => setFormData({ ...formData, category: e.target.value })}
                       >
                         <option value="General">General</option>
                         <option value="Alert">Alert</option>
@@ -226,11 +272,21 @@ const Announcements = () => {
                       </select>
                     </div>
                     <div className="form-group">
+                      <label>Status</label>
+                      <select
+                        value={formData.status}
+                        onChange={e => setFormData({ ...formData, status: e.target.value })}
+                      >
+                        <option value="Draft">Draft</option>
+                        <option value="Published">Published</option>
+                      </select>
+                    </div>
+                    <div className="form-group">
                       <label>Expiry Date</label>
-                      <input 
-                        type="date" 
+                      <input
+                        type="date"
                         value={formData.expiryDate}
-                        onChange={e => setFormData({...formData, expiryDate: e.target.value})}
+                        onChange={e => setFormData({ ...formData, expiryDate: e.target.value })}
                       />
                     </div>
                   </div>
@@ -239,8 +295,8 @@ const Announcements = () => {
 
               <div className="modal-actions-center">
                 <button type="button" className="btn-cancel" onClick={() => setIsModalOpen(false)}>Cancel</button>
-                <button 
-                  type="submit" 
+                <button
+                  type="submit"
                   form={modalType !== 'delete' ? "annForm" : undefined}
                   onClick={modalType === 'delete' ? handleSubmit : undefined}
                   className={`btn-submit ${modalType === 'delete' ? 'danger' : 'primary'}`}

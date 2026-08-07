@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   MdSync, 
   MdSearch,
@@ -8,14 +8,6 @@ import {
 } from 'react-icons/md';
 import toast from 'react-hot-toast';
 import './UpdateStatus.css';
-
-const initialJournals = [
-  { id: 'J-2026-001', title: 'AI in Healthcare: A Systematic Review', author: 'Dr. Rahul Sharma', currentStatus: 'Pending Review', lastUpdated: '2 hours ago' },
-  { id: 'J-2026-002', title: 'Quantum Computing Dynamics', author: 'Priya Verma', currentStatus: 'Reviewed', lastUpdated: '1 day ago' },
-  { id: 'J-2026-003', title: 'Advanced Calculus Methods', author: 'Amit Patel', currentStatus: 'Approved', lastUpdated: '3 days ago' },
-  { id: 'J-2026-005', title: 'Machine Learning in Finance', author: 'James Wilson', currentStatus: 'Pending Review', lastUpdated: '5 days ago' },
-  { id: 'J-2026-007', title: 'Cybersecurity Protocols', author: 'Alex Johnson', currentStatus: 'In Revision', lastUpdated: '1 week ago' },
-];
 
 const STATUS_OPTIONS = [
   'Pending Review',
@@ -39,11 +31,38 @@ const getStatusColor = (status) => {
 };
 
 const UpdateStatus = () => {
-  const [journals, setJournals] = useState(initialJournals);
+  const [journals, setJournals] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   
   // Track changes locally before saving
   const [pendingChanges, setPendingChanges] = useState({});
+
+  useEffect(() => {
+    fetchJournals();
+  }, []);
+
+  const fetchJournals = async () => {
+    try {
+      const token = localStorage.getItem('adminToken');
+      const response = await fetch('http://localhost:5000/api/journals', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const data = await response.json();
+      if (response.ok) {
+        const formatted = data.map(j => ({
+          id: j._id,
+          journalId: j.journalId,
+          title: j.title,
+          author: j.primaryAuthorName || (j.primaryAuthorId && j.primaryAuthorId.name) || 'Unknown',
+          currentStatus: j.status,
+          lastUpdated: new Date(j.updatedAt).toLocaleDateString()
+        }));
+        setJournals(formatted);
+      }
+    } catch (error) {
+      toast.error('Failed to load journals');
+    }
+  };
 
   const handleStatusChange = (id, newStatus) => {
     const journal = journals.find(j => j.id === id);
@@ -56,37 +75,66 @@ const UpdateStatus = () => {
     }
   };
 
-  const handleUpdateSingle = (id) => {
+  const handleUpdateSingle = async (id) => {
     const newStatus = pendingChanges[id];
-    setJournals(journals.map(j => 
-      j.id === id ? { ...j, currentStatus: newStatus, lastUpdated: 'Just now' } : j
-    ));
-    
-    const newChanges = { ...pendingChanges };
-    delete newChanges[id];
-    setPendingChanges(newChanges);
-    
-    toast.success(`Status for ${id} updated to ${newStatus}`);
+    try {
+      const token = localStorage.getItem('adminToken');
+      const response = await fetch(`http://localhost:5000/api/journals/${id}/status`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ status: newStatus })
+      });
+      if (response.ok) {
+        toast.success(`Status updated to ${newStatus}`);
+        setPendingChanges(prev => {
+          const newChanges = { ...prev };
+          delete newChanges[id];
+          return newChanges;
+        });
+        fetchJournals();
+      } else {
+        toast.error('Failed to update status');
+      }
+    } catch (error) {
+      toast.error('Server error');
+    }
   };
 
-  const handleUpdateAll = () => {
+  const handleUpdateAll = async () => {
     const idsToUpdate = Object.keys(pendingChanges);
     if (idsToUpdate.length === 0) return;
 
-    setJournals(journals.map(j => {
-      if (pendingChanges[j.id]) {
-        return { ...j, currentStatus: pendingChanges[j.id], lastUpdated: 'Just now' };
+    try {
+      const token = localStorage.getItem('adminToken');
+      const updates = idsToUpdate.map(id => ({ id, status: pendingChanges[id] }));
+      
+      const response = await fetch('http://localhost:5000/api/journals/bulk-status', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ updates })
+      });
+
+      if (response.ok) {
+        toast.success(`${idsToUpdate.length} journal statuses updated successfully!`);
+        setPendingChanges({});
+        fetchJournals();
+      } else {
+        toast.error('Failed to update bulk status');
       }
-      return j;
-    }));
-    
-    setPendingChanges({});
-    toast.success(`${idsToUpdate.length} journal statuses updated successfully!`);
+    } catch (error) {
+      toast.error('Server error');
+    }
   };
 
   const filteredJournals = journals.filter(j => 
-    j.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
-    j.id.toLowerCase().includes(searchTerm.toLowerCase())
+    (j.title || '').toLowerCase().includes(searchTerm.toLowerCase()) || 
+    (j.journalId || '').toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const pendingCount = Object.keys(pendingChanges).length;
@@ -165,7 +213,7 @@ const UpdateStatus = () => {
                   <tr key={journal.id} className={hasChange ? 'row-highlight' : ''} style={{ animationDelay: `${index * 0.05}s` }}>
                     <td>
                       <div className="journal-info-cell">
-                        <span className="j-id">{journal.id}</span>
+                        <span className="j-id">{journal.journalId}</span>
                         <span className="j-title">{journal.title}</span>
                         <span className="j-author">by {journal.author}</span>
                       </div>

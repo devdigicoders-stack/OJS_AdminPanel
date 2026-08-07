@@ -30,7 +30,7 @@ const ChangePassword = () => {
     setShowPassword({ ...showPassword, [field]: !showPassword[field] });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (formData.newPassword !== formData.confirmPassword) {
       toast.error('New passwords do not match!', { icon: '❌' });
@@ -41,9 +41,31 @@ const ChangePassword = () => {
       return;
     }
     
-    // Simulate successful password change
-    toast.success('Password updated securely!', { icon: '🛡️' });
-    setFormData({ currentPassword: '', newPassword: '', confirmPassword: '' });
+    try {
+      const token = localStorage.getItem('adminToken');
+      const response = await fetch('http://localhost:5000/api/auth/change-password', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          currentPassword: formData.currentPassword,
+          newPassword: formData.newPassword
+        })
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        toast.success('Password updated securely!', { icon: '🛡️' });
+        setFormData({ currentPassword: '', newPassword: '', confirmPassword: '' });
+      } else {
+        toast.error(data.message || 'Failed to update password');
+      }
+    } catch (error) {
+      toast.error('Server error. Please try again later.');
+    }
   };
 
   return (
