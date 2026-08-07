@@ -23,7 +23,7 @@ const Users = () => {
   const [selectedUser, setSelectedUser] = useState(null);
 
   // Form State
-  const [formData, setFormData] = useState({ name: '', email: '', role: 'Author', status: 'Active' });
+  const [formData, setFormData] = useState({ name: '', email: '', password: '', role: 'Author', status: 'Active' });
 
   useEffect(() => {
     fetchUsers();
@@ -96,7 +96,7 @@ const Users = () => {
     if (user && (type === 'edit' || type === 'view')) {
       setFormData({ name: user.name, email: user.email, role: user.role, status: user.status });
     } else {
-      setFormData({ name: '', email: '', role: 'Author', status: 'Active' });
+      setFormData({ name: '', email: '', password: '', role: 'Author', status: 'Active' });
     }
     setIsModalOpen(true);
   };
@@ -122,8 +122,8 @@ const Users = () => {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${token}`
           },
-          // default password for new users, they can reset it later
-          body: JSON.stringify({ ...formData, password: 'password123' })
+          // Send full formData including user provided password
+          body: JSON.stringify(formData)
         });
         const data = await response.json();
 
@@ -419,6 +419,18 @@ const Users = () => {
                       placeholder="e.g. john@example.com"
                     />
                   </div>
+                  {modalType === 'add' && (
+                    <div className="form-group">
+                      <label>Password</label>
+                      <input
+                        type="text"
+                        required
+                        value={formData.password || ''}
+                        onChange={e => setFormData({ ...formData, password: e.target.value })}
+                        placeholder="Set user password"
+                      />
+                    </div>
+                  )}
                   <div className="form-row">
                     <div className="form-group">
                       <label>Role</label>

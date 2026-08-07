@@ -3,6 +3,7 @@ import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   PieChart, Pie, Cell
 } from 'recharts';
+import { Link } from 'react-router-dom';
 import { 
   MdPeople, 
   MdLibraryBooks, 
@@ -19,14 +20,7 @@ import {
 import toast from 'react-hot-toast';
 import './Dashboard.css';
 
-const dataTrend = [
-  { name: 'Dec 2024', submissions: 40 },
-  { name: 'Jan 2025', submissions: 80 },
-  { name: 'Feb 2025', submissions: 62 },
-  { name: 'Mar 2025', submissions: 80 },
-  { name: 'Apr 2025', submissions: 68 },
-  { name: 'May 2025', submissions: 88 },
-];
+// Initial state shouldn't have dummy data
 
 const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6'];
 
@@ -45,14 +39,7 @@ const Dashboard = () => {
     { name: 'Published', value: 0 },
   ]);
 
-  const [trendData, setTrendData] = useState([
-    { name: 'Dec 2024', submissions: 40 },
-    { name: 'Jan 2025', submissions: 80 },
-    { name: 'Feb 2025', submissions: 62 },
-    { name: 'Mar 2025', submissions: 80 },
-    { name: 'Apr 2025', submissions: 68 },
-    { name: 'May 2025', submissions: 88 },
-  ]);
+  const [trendData, setTrendData] = useState([]);
 
   const [recentSubmissions, setRecentSubmissions] = useState([]);
   const [recentAnnouncements, setRecentAnnouncements] = useState([]);
@@ -228,7 +215,7 @@ const Dashboard = () => {
             </div>
           </div>
           <div className="view-link-container right">
-            <a href="#" className="link-action-subtle">View All Journals &rarr;</a>
+            <Link to="/journals" className="link-action-subtle">View All Journals &rarr;</Link>
           </div>
         </div>
       </div>
@@ -237,7 +224,7 @@ const Dashboard = () => {
         <div className="dash-card flex-2">
           <div className="card-top">
             <h3 className="card-title">Recent Submissions</h3>
-            <a href="#" className="link-action-subtle">View All &rarr;</a>
+            <Link to="/journals" className="link-action-subtle">View All &rarr;</Link>
           </div>
           <table className="recent-table">
             <thead>
@@ -272,7 +259,7 @@ const Dashboard = () => {
         <div className="dash-card flex-1">
           <div className="card-top">
             <h3 className="card-title">Recent Announcements</h3>
-            <a href="#" className="link-action-subtle">View All &rarr;</a>
+            <Link to="/announcements" className="link-action-subtle">View All &rarr;</Link>
           </div>
           <div className="announcement-list">
             {recentAnnouncements.length > 0 ? recentAnnouncements.map((ann, index) => {
