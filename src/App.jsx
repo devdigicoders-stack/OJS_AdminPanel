@@ -19,6 +19,7 @@ import Enquiries from './pages/Enquiries';
 import EditJournalPage from './pages/EditJournalPage';
 import EditAboutPage from './pages/EditAboutPage';
 import EditHomePage from './pages/EditHomePage';
+import ManageHero from './pages/ManageHero';
 import ManageReviews from './pages/ManageReviews';
 import EditEditorialBoard from './pages/EditEditorialBoard';
 import { Toaster } from 'react-hot-toast';
@@ -52,6 +53,7 @@ function App() {
           <Route path="journal-policies/:slug" element={<EditJournalPage />} />
           <Route path="about-page" element={<EditAboutPage />} />
           <Route path="home-page" element={<EditHomePage />} />
+          <Route path="manage-hero" element={<ManageHero />} />
           <Route path="manage-reviews" element={<ManageReviews />} />
           <Route path="editorial-board" element={<EditEditorialBoard />} />
           <Route path="profile" element={<Profile />} />

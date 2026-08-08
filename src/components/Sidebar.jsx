@@ -113,6 +113,9 @@ const Sidebar = ({ isOpen }) => {
           
           {homeOpen && (
             <div className="sidebar-submenu" style={{ paddingLeft: '40px', display: 'flex', flexDirection: 'column', gap: '5px', marginTop: '5px', marginBottom: '10px' }}>
+              <NavLink to="/manage-hero" className={({ isActive }) => isActive ? "sidebar-subitem active" : "sidebar-subitem"} style={{ fontSize: '13px', color: '#cbd5e1', textDecoration: 'none', padding: '8px 0' }}>
+                Manage Hero Section
+              </NavLink>
               <NavLink to="/home-page" className={({ isActive }) => isActive ? "sidebar-subitem active" : "sidebar-subitem"} style={{ fontSize: '13px', color: '#cbd5e1', textDecoration: 'none', padding: '8px 0' }}>
                 Manage Home Page
               </NavLink>
