@@ -180,18 +180,20 @@ const JournalDetails = () => {
           </div>
 
           <div className="detail-card">
-            <h3>Review History</h3>
+            <h3>Reviewer Feedback</h3>
             <div className="timeline">
-              {journal.reviews && journal.reviews.length > 0 ? journal.reviews.map((rev, idx) => (
-                <div className="timeline-item" key={idx}>
+              {journal.reviewerFeedback ? (
+                <div className="timeline-item">
                   <div className="timeline-dot"></div>
                   <div className="timeline-content">
-                    <h4>{rev.reviewer} <span>{rev.date}</span></h4>
-                    <p>{rev.comment}</p>
+                    <h4>{journal.assignedReviewer?.name || 'Reviewer'} <span>{new Date(journal.updatedAt).toLocaleDateString()}</span></h4>
+                    <p>{journal.reviewerFeedback}</p>
+                    {journal.status === 'Rejected' && <span style={{color: '#e53e3e', fontSize: '12px', fontWeight: 600}}>Status: Rejected by Reviewer</span>}
+                    {journal.status === 'Reviewed' && <span style={{color: '#38a169', fontSize: '12px', fontWeight: 600}}>Status: Completed / Approved by Reviewer</span>}
                   </div>
                 </div>
-              )) : (
-                <p style={{color: '#666'}}>No review history available.</p>
+              ) : (
+                <p style={{color: '#666'}}>No feedback provided yet by reviewer.</p>
               )}
             </div>
           </div>

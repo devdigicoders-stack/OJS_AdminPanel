@@ -71,7 +71,7 @@ const Publish = () => {
           author: j.primaryAuthorName || (j.primaryAuthorId && j.primaryAuthorId.name) || 'Unknown',
           department: j.department || 'N/A',
           approvedDate: new Date(j.updatedAt || Date.now()).toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' }),
-          status: 'Ready to Publish'
+          status: j.status
         }));
         setJournals(formatted);
       }
@@ -211,7 +211,15 @@ const Publish = () => {
                       <button className="btn-ar-action view" title="View Details" onClick={() => navigate(`/journals/${journal._id}`)}>
                         <MdOutlineRemoveRedEye /> View
                       </button>
-                      <button className="btn-ar-action publish-btn" title="Publish" onClick={() => handleActionClick(journal)}>
+                      <button 
+                        className={`btn-ar-action publish-btn ${journal.status !== 'Reviewed' ? 'disabled' : ''}`}
+                        title={journal.status !== 'Reviewed' ? "Reviewer hasn't completed review yet" : "Publish"} 
+                        onClick={() => {
+                          if (journal.status === 'Reviewed') handleActionClick(journal);
+                          else toast.error("Cannot publish until reviewer marks it as 'Reviewed'");
+                        }}
+                        style={{ opacity: journal.status !== 'Reviewed' ? 0.5 : 1, cursor: journal.status !== 'Reviewed' ? 'not-allowed' : 'pointer' }}
+                      >
                         <MdRocketLaunch /> Publish Now
                       </button>
                     </div>

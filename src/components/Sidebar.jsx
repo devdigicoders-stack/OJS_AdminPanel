@@ -15,10 +15,10 @@ import {
   MdQuestionAnswer,
   MdEmail,
   MdPolicy,
-  MdInfo,
-  MdKeyboardArrowDown,
+  MdHome,
   MdKeyboardArrowRight,
-  MdHome
+  MdKeyboardArrowDown,
+  MdInfo
 } from 'react-icons/md';
 import logo from '../assets/logo.png';
 import './Sidebar.css';

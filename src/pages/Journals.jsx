@@ -269,7 +269,20 @@ const Journals = () => {
                       
                       <div className="divider"></div>
                       
-                      <button className="action-btn assign" title="Assign Reviewer" onClick={() => handleOpenModal('reviewer', journal)}><MdPersonAdd /></button>
+                      <button 
+                        className={`action-btn assign ${journal.status === 'Published' ? 'disabled' : ''}`} 
+                        title={journal.status === 'Published' ? "Cannot re-assign reviewer after publishing" : "Assign Reviewer"} 
+                        onClick={() => {
+                          if (journal.status === 'Published') {
+                            toast.error("You cannot assign a reviewer to a Published journal.");
+                          } else {
+                            handleOpenModal('reviewer', journal);
+                          }
+                        }}
+                        style={{ opacity: journal.status === 'Published' ? 0.4 : 1, cursor: journal.status === 'Published' ? 'not-allowed' : 'pointer' }}
+                      >
+                        <MdPersonAdd />
+                      </button>
                       
                       {journal.status === 'Pending Review' && (
                         <button className="action-btn approve" title="Mark as Reviewed" onClick={() => handleOpenModal('status', journal, 'Reviewed')}><MdCheck /></button>

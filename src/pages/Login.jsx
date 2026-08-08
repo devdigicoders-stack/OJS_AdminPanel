@@ -63,12 +63,12 @@ const Login = () => {
         <div className="login-left-col">
           <div className="left-pattern-dots"></div>
 
-          <div className="brand-section">
-            <div className="brand-logo bg-white p-2 rounded-lg mb-4 inline-block">
-              <img src={logo} alt="Praxis Logo" className="h-16 object-contain" />
+          <div className="brand-section" style={{ textAlign: 'left', marginBottom: '30px' }}>
+            <div style={{ marginBottom: '16px', display: 'inline-block' }}>
+              <img src={logo} alt="Praxis Logo" style={{ height: '70px', objectFit: 'contain' }} />
             </div>
-            <p className="brand-subtitle">Journal of society, behaviour and institutions</p>
-            <div className="brand-line"></div>
+            <p className="brand-subtitle" style={{ color: '#fff', fontSize: '14px', margin: '0' }}>Journal of society, behaviour and institutions</p>
+            <div className="brand-line" style={{ width: '40px', height: '3px', background: '#3b82f6', marginTop: '10px' }}></div>
           </div>
 
           <div className="welcome-section">
