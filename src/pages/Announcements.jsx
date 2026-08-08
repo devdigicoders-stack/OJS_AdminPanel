@@ -21,7 +21,7 @@ const Announcements = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalType, setModalType] = useState(''); // 'add', 'edit', 'delete'
   const [selectedAnn, setSelectedAnn] = useState(null);
-  const [formData, setFormData] = useState({ title: '', category: 'General', expiryDate: '', status: 'Draft' });
+  const [formData, setFormData] = useState({ title: '', category: 'General', expiryDate: '', status: 'Draft', media: null });
 
   React.useEffect(() => {
     fetchAnnouncements();
@@ -57,10 +57,11 @@ const Announcements = () => {
         title: ann.title, 
         category: ann.category, 
         expiryDate: ann.expiryDate ? new Date(ann.expiryDate).toISOString().split('T')[0] : '',
-        status: ann.status 
+        status: ann.status,
+        media: null
       });
     } else {
-      setFormData({ title: '', category: 'General', expiryDate: '', status: 'Draft' });
+      setFormData({ title: '', category: 'General', expiryDate: '', status: 'Draft', media: null });
     }
     setIsModalOpen(true);
   };
@@ -82,13 +83,20 @@ const Announcements = () => {
       } 
       else if (modalType === 'add') {
         if (!formData.title) return toast.error('Title is required');
+        
+        const data = new FormData();
+        data.append('title', formData.title);
+        data.append('category', formData.category);
+        data.append('expiryDate', formData.expiryDate);
+        data.append('status', formData.status);
+        if (formData.media) data.append('media', formData.media);
+
         const response = await fetch(`${import.meta.env.VITE_API_URL}/announcements`, {
           method: 'POST',
           headers: { 
-            'Content-Type': 'application/json',
             'Authorization': `Bearer ${token}` 
           },
-          body: JSON.stringify(formData)
+          body: data
         });
         if (response.ok) {
           toast.success('New announcement created!');
@@ -97,13 +105,20 @@ const Announcements = () => {
       } 
       else if (modalType === 'edit') {
         if (!formData.title) return toast.error('Title is required');
+        
+        const data = new FormData();
+        data.append('title', formData.title);
+        data.append('category', formData.category);
+        data.append('expiryDate', formData.expiryDate);
+        data.append('status', formData.status);
+        if (formData.media) data.append('media', formData.media);
+
         const response = await fetch(`${import.meta.env.VITE_API_URL}/announcements/${selectedAnn._id}`, {
           method: 'PUT',
           headers: { 
-            'Content-Type': 'application/json',
             'Authorization': `Bearer ${token}` 
           },
-          body: JSON.stringify(formData)
+          body: data
         });
         if (response.ok) {
           toast.success('Announcement updated!');
@@ -261,6 +276,24 @@ const Announcements = () => {
                   </div>
                   <div className="form-row">
                     <div className="form-group">
+                      <label>Media (Image/PDF) <span style={{fontSize: '11px', color: '#666'}}>(Optional)</span></label>
+                      <input 
+                        type="file" 
+                        accept=".jpg,.jpeg,.png,.pdf,.doc,.docx"
+                        onChange={(e) => setFormData({...formData, media: e.target.files[0]})}
+                        className="form-input"
+                      />
+                      {modalType === 'edit' && selectedAnn?.mediaPath && (
+                        <p style={{fontSize: '12px', marginTop: '4px', color: '#2563EB'}}>
+                          <a href={`${import.meta.env.VITE_API_URL.replace('/api', '')}/${selectedAnn.mediaPath}`} target="_blank" rel="noreferrer">
+                            View Current Media
+                          </a>
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                  <div className="modal-footer">
+                    <div className="form-group">
                       <label>Category</label>
                       <select
                         value={formData.category}
@@ -310,7 +343,7 @@ const Announcements = () => {
       )}
 
       <div className="dash-footer">
-        © 2025 Open Journal Systems. All rights reserved.
+        © 2025 Journal of society, behaviour and institutions. All rights reserved.
       </div>
     </div>
   );

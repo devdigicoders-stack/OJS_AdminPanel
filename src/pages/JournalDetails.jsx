@@ -216,7 +216,7 @@ const JournalDetails = () => {
             </div>
 
             <div className="action-panel">
-              <button className="panel-btn approve" onClick={handleApprove}><MdCheckCircle /> Approve</button>
+              <button className="panel-btn approve" onClick={handleApprove} disabled={status === 'Approved' || status === 'Published'}><MdCheckCircle /> Approve</button>
               <button className="panel-btn publish" onClick={handlePublish} disabled={status !== 'Approved'}><MdPublish /> Publish</button>
               <button className="panel-btn reject" onClick={handleReject}><MdCancel /> Reject</button>
             </div>

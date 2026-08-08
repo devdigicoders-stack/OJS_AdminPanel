@@ -1,19 +1,19 @@
 import React from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
-import { 
-  MdDashboard, 
-  MdPeople, 
-  MdLibraryBooks, 
-  MdSync, 
+import {
+  MdDashboard,
+  MdPeople,
+  MdLibraryBooks,
+  MdSync,
   MdFactCheck,
   MdSend,
   MdCampaign,
   MdPerson,
   MdLockOutline,
-  MdLogout,
-  MdMenuBook
+  MdLogout
 } from 'react-icons/md';
+import logo from '../assets/logo.png';
 import './Sidebar.css';
 
 const Sidebar = ({ isOpen }) => {
@@ -30,7 +30,9 @@ const Sidebar = ({ isOpen }) => {
       confirmButtonText: 'Yes, Logout'
     }).then((result) => {
       if (result.isConfirmed) {
-        navigate('/login');
+        localStorage.removeItem('adminToken');
+        localStorage.removeItem('adminUser');
+        window.location.href = '/login';
       }
     });
   };
@@ -38,55 +40,55 @@ const Sidebar = ({ isOpen }) => {
   return (
     <div className={`sidebar ${!isOpen ? 'closed' : ''}`}>
       <div className="sidebar-logo">
-        <div className="logo-icon-wrapper">
-          <MdMenuBook className="logo-icon" />
-          <h2 className="logo-text-large">OJS</h2>
+        <div className="sidebar-header w-full flex justify-center">
+          <div className="logo-container w-[90%] max-w-[240px]">
+            <img src={logo} alt="Praxis Logo" className="h-[120px] object-contain w-full" />
+          </div>
         </div>
-        <p className="logo-subtitle">Open Journal Systems</p>
       </div>
 
       <div className="sidebar-menu">
-        <NavLink to="/" className={({isActive}) => isActive ? "sidebar-item active" : "sidebar-item"} end>
+        <NavLink to="/" className={({ isActive }) => isActive ? "sidebar-item active" : "sidebar-item"} end>
           <span className="icon"><MdDashboard /></span>
           Dashboard
         </NavLink>
-        
-        <NavLink to="/users" className={({isActive}) => isActive ? "sidebar-item active" : "sidebar-item"}>
+
+        <NavLink to="/users" className={({ isActive }) => isActive ? "sidebar-item active" : "sidebar-item"}>
           <span className="icon"><MdPeople /></span>
           Manage Users
         </NavLink>
-        
-        <NavLink to="/journals" className={({isActive}) => isActive ? "sidebar-item active" : "sidebar-item"}>
+
+        <NavLink to="/journals" className={({ isActive }) => isActive ? "sidebar-item active" : "sidebar-item"}>
           <span className="icon"><MdLibraryBooks /></span>
           Manage Journals
         </NavLink>
 
-        <NavLink to="/update-status" className={({isActive}) => isActive ? "sidebar-item active" : "sidebar-item"}>
+        <NavLink to="/update-status" className={({ isActive }) => isActive ? "sidebar-item active" : "sidebar-item"}>
           <span className="icon"><MdSync /></span>
           Update Journal Status
         </NavLink>
 
-        <NavLink to="/approve-reject" className={({isActive}) => isActive ? "sidebar-item active" : "sidebar-item"}>
+        <NavLink to="/approve-reject" className={({ isActive }) => isActive ? "sidebar-item active" : "sidebar-item"}>
           <span className="icon"><MdFactCheck /></span>
           Approve / Reject Journal
         </NavLink>
 
-        <NavLink to="/publish" className={({isActive}) => isActive ? "sidebar-item active" : "sidebar-item"}>
+        <NavLink to="/publish" className={({ isActive }) => isActive ? "sidebar-item active" : "sidebar-item"}>
           <span className="icon"><MdSend /></span>
           Publish Journal
         </NavLink>
 
-        <NavLink to="/announcements" className={({isActive}) => isActive ? "sidebar-item active" : "sidebar-item"}>
+        <NavLink to="/announcements" className={({ isActive }) => isActive ? "sidebar-item active" : "sidebar-item"}>
           <span className="icon"><MdCampaign /></span>
           Manage Announcements
         </NavLink>
 
-        <NavLink to="/profile" className={({isActive}) => isActive ? "sidebar-item active" : "sidebar-item"}>
+        <NavLink to="/profile" className={({ isActive }) => isActive ? "sidebar-item active" : "sidebar-item"}>
           <span className="icon"><MdPerson /></span>
           My Profile
         </NavLink>
 
-        <NavLink to="/change-password" className={({isActive}) => isActive ? "sidebar-item active" : "sidebar-item"}>
+        <NavLink to="/change-password" className={({ isActive }) => isActive ? "sidebar-item active" : "sidebar-item"}>
           <span className="icon"><MdLockOutline /></span>
           Change Password
         </NavLink>

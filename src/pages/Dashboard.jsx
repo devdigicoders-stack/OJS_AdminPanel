@@ -3,7 +3,7 @@ import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   PieChart, Pie, Cell
 } from 'recharts';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { 
   MdPeople, 
   MdLibraryBooks, 
@@ -25,11 +25,18 @@ import './Dashboard.css';
 const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6'];
 
 const Dashboard = () => {
+  const navigate = useNavigate();
   const [stats, setStats] = useState({
     totalUsers: 0,
     totalJournals: 0,
     pendingReviews: 0,
-    publishedJournals: 0
+    publishedJournals: 0,
+    trends: {
+      users: 0,
+      journals: 0,
+      pending: 0,
+      published: 0
+    }
   });
 
   const [statusData, setStatusData] = useState([
@@ -121,7 +128,9 @@ const Dashboard = () => {
           <div className="stat-content">
             <p>Total Users</p>
             <h3>{stats.totalUsers}</h3>
-            <span className="trend positive"><MdArrowUpward/> 12.5% <span>from last month</span></span>
+            <span className={`trend ${stats.trends?.users >= 0 ? 'positive' : 'negative'}`}>
+              {stats.trends?.users >= 0 ? <MdArrowUpward/> : <MdArrowDownward/>} {Math.abs(stats.trends?.users || 0)}% <span>from last month</span>
+            </span>
           </div>
         </div>
         <div className="stat-card">
@@ -129,7 +138,9 @@ const Dashboard = () => {
           <div className="stat-content">
             <p>Total Journals</p>
             <h3>{stats.totalJournals}</h3>
-            <span className="trend positive"><MdArrowUpward/> 8.3% <span>from last month</span></span>
+            <span className={`trend ${stats.trends?.journals >= 0 ? 'positive' : 'negative'}`}>
+              {stats.trends?.journals >= 0 ? <MdArrowUpward/> : <MdArrowDownward/>} {Math.abs(stats.trends?.journals || 0)}% <span>from last month</span>
+            </span>
           </div>
         </div>
         <div className="stat-card">
@@ -137,7 +148,9 @@ const Dashboard = () => {
           <div className="stat-content">
             <p>Pending Review</p>
             <h3>{stats.pendingReviews}</h3>
-            <span className="trend negative"><MdArrowDownward/> 5.2% <span>from last month</span></span>
+            <span className={`trend ${stats.trends?.pending >= 0 ? 'positive' : 'negative'}`}>
+              {stats.trends?.pending >= 0 ? <MdArrowUpward/> : <MdArrowDownward/>} {Math.abs(stats.trends?.pending || 0)}% <span>from last month</span>
+            </span>
           </div>
         </div>
         <div className="stat-card">
@@ -145,7 +158,9 @@ const Dashboard = () => {
           <div className="stat-content">
             <p>Published Journals</p>
             <h3>{stats.publishedJournals}</h3>
-            <span className="trend positive"><MdArrowUpward/> 15.7% <span>from last month</span></span>
+            <span className={`trend ${stats.trends?.published >= 0 ? 'positive' : 'negative'}`}>
+              {stats.trends?.published >= 0 ? <MdArrowUpward/> : <MdArrowDownward/>} {Math.abs(stats.trends?.published || 0)}% <span>from last month</span>
+            </span>
           </div>
         </div>
       </div>
@@ -245,7 +260,7 @@ const Dashboard = () => {
                   <td>{journal.primaryAuthorName || journal.primaryAuthorId?.name || 'Unknown Author'}</td>
                   <td>{new Date(journal.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</td>
                   <td><span className={`badge-status ${journal.status.toLowerCase().replace(' ', '-')}`}>{journal.status}</span></td>
-                  <td><button className="action-icon"><MdOutlineRemoveRedEye/></button></td>
+                  <td><button className="action-icon" onClick={() => navigate(`/journals/${journal._id}`)} title="View Details"><MdOutlineRemoveRedEye/></button></td>
                 </tr>
               )) : (
                 <tr>
@@ -287,7 +302,7 @@ const Dashboard = () => {
       </div>
       
       <div className="dash-footer">
-        © 2025 Open Journal Systems. All rights reserved.
+        © 2025 Journal of society, behaviour and institutions. All rights reserved.
       </div>
     </div>
   );

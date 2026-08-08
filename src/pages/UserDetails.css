@@ -48,6 +48,11 @@
   align-items: start;
 }
 
+.profile-left {
+  position: sticky;
+  top: 24px;
+}
+
 .profile-card {
   background: #fff;
   border-radius: 12px;

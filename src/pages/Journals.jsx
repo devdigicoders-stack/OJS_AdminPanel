@@ -251,7 +251,21 @@ const Journals = () => {
                   <td>
                     <div className="action-buttons">
                       <button className="action-btn view" title="View Details" onClick={() => navigate(`/journals/${journal._id}`)}><MdOutlineRemoveRedEye /></button>
-                      <button className="action-btn download" title="Download PDF"><MdFileDownload /></button>
+                      <button 
+                        className="action-btn download" 
+                        title="Download PDF"
+                        onClick={() => {
+                          if (journal.mainFilePath) {
+                            const baseUrl = import.meta.env.VITE_API_URL.replace('/api', '');
+                            const fileUrl = `${baseUrl}/${journal.mainFilePath.replace(/\\/g, '/')}`;
+                            window.open(fileUrl, '_blank');
+                          } else {
+                            toast.error('No file available to download');
+                          }
+                        }}
+                      >
+                        <MdFileDownload />
+                      </button>
                       
                       <div className="divider"></div>
                       
@@ -355,7 +369,7 @@ const Journals = () => {
       )}
       
       <div className="dash-footer">
-        © 2025 Open Journal Systems. All rights reserved.
+        © 2025 Journal of society, behaviour and institutions. All rights reserved.
       </div>
     </div>
   );

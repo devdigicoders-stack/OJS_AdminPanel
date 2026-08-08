@@ -10,6 +10,9 @@ const UserDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
+  const [journals, setJournals] = useState([]);
+  const [activeStatFilter, setActiveStatFilter] = useState('');
+  const [stats, setStats] = useState({ total: 0, published: 0, rejected: 0, underReview: 0, processing: 0 });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -19,12 +22,32 @@ const UserDetails = () => {
   const fetchUser = async () => {
     try {
       const token = localStorage.getItem('adminToken');
+      
+      // Fetch user details
       const response = await fetch(`${import.meta.env.VITE_API_URL}/users/${id}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       const data = await response.json();
+      
+      // Fetch user's journals to calculate stats
+      const journalsRes = await fetch(`${import.meta.env.VITE_API_URL}/journals?authorId=${id}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const journalsData = await journalsRes.json();
+      
       if (response.ok) {
         setUser(data);
+        if (journalsRes.ok && Array.isArray(journalsData)) {
+          setJournals(journalsData);
+          const newStats = {
+            total: journalsData.length,
+            published: journalsData.filter(j => j.status === 'Published').length,
+            rejected: journalsData.filter(j => j.status === 'Rejected').length,
+            underReview: journalsData.filter(j => j.status === 'Under Review').length,
+            processing: journalsData.filter(j => j.status === 'Processing').length,
+          };
+          setStats(newStats);
+        }
       } else {
         toast.error(data.message || 'Failed to load user details');
       }
@@ -118,6 +141,74 @@ const UserDetails = () => {
                 <span className="d-value">{new Date(user.createdAt).toLocaleDateString()}</span>
               </div>
             </div>
+          </div>
+
+          <div className="profile-card">
+            <h3><MdDateRange className="card-icon" /> Journal Submission Stats</h3>
+            <div className="stats-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: '15px', marginTop: '10px' }}>
+              <div 
+                onClick={() => setActiveStatFilter(activeStatFilter === 'All' ? '' : 'All')}
+                style={{ background: '#EFF6FF', padding: '15px', borderRadius: '10px', textAlign: 'center', cursor: 'pointer', border: activeStatFilter === 'All' ? '2px solid #2563EB' : '2px solid transparent' }}
+              >
+                <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#2563EB' }}>{stats.total}</div>
+                <div style={{ fontSize: '12px', color: '#6B7280', marginTop: '5px' }}>Total Uploaded</div>
+              </div>
+              <div 
+                onClick={() => setActiveStatFilter(activeStatFilter === 'Published' ? '' : 'Published')}
+                style={{ background: '#F0FDF4', padding: '15px', borderRadius: '10px', textAlign: 'center', cursor: 'pointer', border: activeStatFilter === 'Published' ? '2px solid #16A34A' : '2px solid transparent' }}
+              >
+                <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#16A34A' }}>{stats.published}</div>
+                <div style={{ fontSize: '12px', color: '#6B7280', marginTop: '5px' }}>Published</div>
+              </div>
+              <div 
+                onClick={() => setActiveStatFilter(activeStatFilter === 'Under Review' ? '' : 'Under Review')}
+                style={{ background: '#FFFBEB', padding: '15px', borderRadius: '10px', textAlign: 'center', cursor: 'pointer', border: activeStatFilter === 'Under Review' ? '2px solid #D97706' : '2px solid transparent' }}
+              >
+                <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#D97706' }}>{stats.underReview}</div>
+                <div style={{ fontSize: '12px', color: '#6B7280', marginTop: '5px' }}>Under Review</div>
+              </div>
+              <div 
+                onClick={() => setActiveStatFilter(activeStatFilter === 'Rejected' ? '' : 'Rejected')}
+                style={{ background: '#FEF2F2', padding: '15px', borderRadius: '10px', textAlign: 'center', cursor: 'pointer', border: activeStatFilter === 'Rejected' ? '2px solid #DC2626' : '2px solid transparent' }}
+              >
+                <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#DC2626' }}>{stats.rejected}</div>
+                <div style={{ fontSize: '12px', color: '#6B7280', marginTop: '5px' }}>Rejected</div>
+              </div>
+            </div>
+            
+            {activeStatFilter && (
+              <div style={{ marginTop: '20px', background: '#F9FAFB', padding: '15px', borderRadius: '10px', border: '1px solid #E5E7EB' }}>
+                <h4 style={{ marginBottom: '10px', color: '#374151', fontSize: '14px', fontWeight: '600' }}>
+                  {activeStatFilter === 'All' ? 'All Submitted Journals' : `${activeStatFilter} Journals`}
+                </h4>
+                {journals.filter(j => activeStatFilter === 'All' || j.status === activeStatFilter).length > 0 ? (
+                  <div style={{ overflowX: 'auto' }}>
+                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12.5px' }}>
+                      <thead>
+                        <tr style={{ borderBottom: '1px solid #E5E7EB' }}>
+                          <th style={{ textAlign: 'left', padding: '8px 0', color: '#6B7280', fontWeight: 600 }}>ID</th>
+                          <th style={{ textAlign: 'left', padding: '8px 0', color: '#6B7280', fontWeight: 600 }}>Title</th>
+                          <th style={{ textAlign: 'left', padding: '8px 0', color: '#6B7280', fontWeight: 600 }}>Status</th>
+                          <th style={{ textAlign: 'left', padding: '8px 0', color: '#6B7280', fontWeight: 600 }}>Submitted On</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {journals.filter(j => activeStatFilter === 'All' || j.status === activeStatFilter).map(j => (
+                          <tr key={j._id} style={{ borderBottom: '1px solid #E5E7EB' }}>
+                            <td style={{ padding: '8px 0', color: '#374151', fontWeight: 500 }}>{j.journalId}</td>
+                            <td style={{ padding: '8px 0', color: '#111827', maxWidth: '150px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{j.title}</td>
+                            <td style={{ padding: '8px 0' }}><span className={`status-badge ${j.status.toLowerCase()}`} style={{ padding: '2px 8px', fontSize: '11px' }}>{j.status}</span></td>
+                            <td style={{ padding: '8px 0', color: '#6B7280' }}>{new Date(j.createdAt).toLocaleDateString()}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                ) : (
+                  <p style={{ fontSize: '12px', color: '#6B7280', margin: 0 }}>No journals found for this category.</p>
+                )}
+              </div>
+            )}
           </div>
 
           <div className="profile-card">

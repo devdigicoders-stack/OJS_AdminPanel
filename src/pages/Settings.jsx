@@ -20,7 +20,7 @@ const Settings = () => {
             <h3>General Settings</h3>
             <div className="info-group">
               <label>Journal Platform Name</label>
-              <input type="text" className="status-select" defaultValue="Open Journal Systems" />
+              <input type="text" className="status-select" defaultValue="Journal of society, behaviour and institutions" />
             </div>
             <div className="info-group">
               <label>Contact Email</label>

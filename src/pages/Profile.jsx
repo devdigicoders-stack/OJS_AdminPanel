@@ -225,7 +225,7 @@ const Profile = () => {
       </div>
       
       <div className="dash-footer">
-        © 2026 Open Journal Systems.
+        © 2026 Journal of society, behaviour and institutions.
       </div>
     </div>
   );

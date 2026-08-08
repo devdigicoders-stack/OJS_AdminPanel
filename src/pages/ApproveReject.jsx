@@ -355,7 +355,7 @@ const ApproveReject = () => {
       )}
 
       <div className="dash-footer">
-        © 2025 Open Journal Systems. All rights reserved.
+        © 2025 Journal of society, behaviour and institutions. All rights reserved.
       </div>
     </div>
   );

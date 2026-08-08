@@ -161,7 +161,7 @@ const ChangePassword = () => {
       </div>
       
       <div className="dash-footer cp-footer">
-        © 2025 Open Journal Systems. Secure Platform.
+        © 2025 Journal of society, behaviour and institutions. Secure Platform.
       </div>
     </div>
   );
