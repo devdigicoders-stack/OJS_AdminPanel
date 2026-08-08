@@ -14,6 +14,13 @@ import ChangePassword from './pages/ChangePassword';
 import UpdateStatus from './pages/UpdateStatus';
 import ApproveReject from './pages/ApproveReject';
 import Publish from './pages/Publish';
+import Faqs from './pages/Faqs';
+import Enquiries from './pages/Enquiries';
+import EditJournalPage from './pages/EditJournalPage';
+import EditAboutPage from './pages/EditAboutPage';
+import EditHomePage from './pages/EditHomePage';
+import ManageReviews from './pages/ManageReviews';
+import EditEditorialBoard from './pages/EditEditorialBoard';
 import { Toaster } from 'react-hot-toast';
 import './App.css';
 
@@ -40,6 +47,13 @@ function App() {
           <Route path="announcements" element={<Announcements />} />
           <Route path="reports" element={<Reports />} />
           <Route path="settings" element={<Settings />} />
+          <Route path="faqs" element={<Faqs />} />
+          <Route path="enquiries" element={<Enquiries />} />
+          <Route path="journal-policies/:slug" element={<EditJournalPage />} />
+          <Route path="about-page" element={<EditAboutPage />} />
+          <Route path="home-page" element={<EditHomePage />} />
+          <Route path="manage-reviews" element={<ManageReviews />} />
+          <Route path="editorial-board" element={<EditEditorialBoard />} />
           <Route path="profile" element={<Profile />} />
           <Route path="change-password" element={<ChangePassword />} />
         </Route>

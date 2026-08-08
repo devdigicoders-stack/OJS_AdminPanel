@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+// Force Vite HMR reload
 import { 
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   PieChart, Pie, Cell
