@@ -8,7 +8,9 @@ import {
   MdFilterList,
   MdClose,
   MdOutlineAccessTime,
-  MdCheckCircle
+  MdCheckCircle,
+  MdToggleOn,
+  MdToggleOff
 } from 'react-icons/md';
 import toast from 'react-hot-toast';
 import './Announcements.css';
@@ -39,6 +41,24 @@ const Announcements = () => {
       }
     } catch (error) {
       toast.error('Failed to load announcements');
+    }
+  };
+
+  const handleToggleStatus = async (ann) => {
+    try {
+      const token = localStorage.getItem('adminToken');
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/announcements/${ann._id}/toggle-status`, {
+        method: 'PATCH',
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (response.ok) {
+        toast.success('Status updated successfully!');
+        fetchAnnouncements();
+      } else {
+        toast.error('Failed to toggle status');
+      }
+    } catch (error) {
+      toast.error('Server error');
     }
   };
 
@@ -224,6 +244,14 @@ const Announcements = () => {
                   </td>
                   <td>
                     <div className="action-buttons-ar">
+                      <button 
+                        className={`btn-ar-action ${ann.status === 'Published' ? 'delete' : 'edit'}`} 
+                        title={ann.status === 'Published' ? 'Deactivate (Set to Draft)' : 'Activate (Publish)'}
+                        onClick={() => handleToggleStatus(ann)}
+                      >
+                        {ann.status === 'Published' ? <MdToggleOn size={20} /> : <MdToggleOff size={20} />}
+                        {ann.status === 'Published' ? ' Deactivate' : ' Activate'}
+                      </button>
                       <button className="btn-ar-action edit" title="Edit" onClick={() => handleOpenModal('edit', ann)}>
                         <MdEdit /> Edit
                       </button>
