@@ -304,7 +304,7 @@ const EditAboutPage = () => {
 
       <div className="card-panel">
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-          <h2>Editorial Team</h2>
+          <h2>Editorial Board</h2>
           <button className="btn-secondary-action" onClick={() => addObjectArrayItem('team', { name: '', role: '', img: '' })} style={{ padding: '4px 10px', fontSize: '13px' }}>
             <MdAdd /> Add Member
           </button>

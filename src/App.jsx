@@ -22,6 +22,7 @@ import EditHomePage from './pages/EditHomePage';
 import ManageHero from './pages/ManageHero';
 import ManageReviews from './pages/ManageReviews';
 import EditEditorialBoard from './pages/EditEditorialBoard';
+import EditReviewerBoard from './pages/EditReviewerBoard';
 import { Toaster } from 'react-hot-toast';
 import './App.css';
 
@@ -56,6 +57,7 @@ function App() {
           <Route path="manage-hero" element={<ManageHero />} />
           <Route path="manage-reviews" element={<ManageReviews />} />
           <Route path="editorial-board" element={<EditEditorialBoard />} />
+          <Route path="reviewer-board" element={<EditReviewerBoard />} />
           <Route path="profile" element={<Profile />} />
           <Route path="change-password" element={<ChangePassword />} />
         </Route>

@@ -225,7 +225,7 @@ const Profile = () => {
       </div>
       
       <div className="dash-footer">
-        © 2026 Journal of society, behaviour and institutions.
+        © 2026 Praxis Journal of Society, Behaviour and Institutional Studies.
       </div>
     </div>
   );

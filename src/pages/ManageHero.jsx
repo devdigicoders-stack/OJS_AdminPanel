@@ -258,7 +258,7 @@ const ManageHero = () => {
           </div>
           <div>
             <label style={labelStyle}>Main Title (H1)</label>
-            <input type="text" name="title" value={hero.title} onChange={handleChange} style={inputStyle} placeholder="e.g. Journal of society, behaviour and institutions" />
+            <input type="text" name="title" value={hero.title} onChange={handleChange} style={inputStyle} placeholder="e.g. Praxis Journal of Society, Behaviour and Institutional Studies" />
           </div>
           <div>
             <label style={labelStyle}>Subtitle / Description</label>

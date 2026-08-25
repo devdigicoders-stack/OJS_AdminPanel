@@ -473,7 +473,7 @@ const Users = () => {
       )}
 
       <div className="dash-footer">
-        © 2025 Journal of society, behaviour and institutions. All rights reserved.
+        © 2025 Praxis Journal of Society, Behaviour and Institutional Studies. All rights reserved.
       </div>
     </div>
   );

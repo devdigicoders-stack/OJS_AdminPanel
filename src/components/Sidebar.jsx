@@ -147,6 +147,9 @@ const Sidebar = ({ isOpen }) => {
               <NavLink to="/editorial-board" className={({ isActive }) => isActive ? "sidebar-subitem active" : "sidebar-subitem"} style={{ fontSize: '13px', color: '#cbd5e1', textDecoration: 'none', padding: '8px 0' }}>
                 Editorial Board
               </NavLink>
+              <NavLink to="/reviewer-board" className={({ isActive }) => isActive ? "sidebar-subitem active" : "sidebar-subitem"} style={{ fontSize: '13px', color: '#cbd5e1', textDecoration: 'none', padding: '8px 0' }}>
+                Reviewer Board
+              </NavLink>
             </div>
           )}
         </div>

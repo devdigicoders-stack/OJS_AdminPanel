@@ -67,7 +67,7 @@ const Login = () => {
             <div style={{ marginBottom: '16px', display: 'inline-block' }}>
               <img src={logo} alt="Praxis Logo" style={{ height: '70px', objectFit: 'contain' }} />
             </div>
-            <p className="brand-subtitle" style={{ color: '#fff', fontSize: '14px', margin: '0' }}>Journal of society, behaviour and institutions</p>
+            <p className="brand-subtitle" style={{ color: '#fff', fontSize: '14px', margin: '0' }}>Praxis Journal of Society, Behaviour and Institutional Studies</p>
             <div className="brand-line" style={{ width: '40px', height: '3px', background: '#3b82f6', marginTop: '10px' }}></div>
           </div>
 
