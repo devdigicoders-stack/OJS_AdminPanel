@@ -24,7 +24,7 @@
 /* LEFT COLUMN */
 .login-left-col {
   flex: 1;
-  background: #0b1f41;
+  background: #0C1B32;
   position: relative;
   display: flex;
   flex-direction: column;
@@ -238,7 +238,7 @@
   justify-content: center;
   align-items: center;
   padding: 60px;
-  background-color: #ffffff;
+  background-color: #0C1B32;
 }
 
 .login-form-container {
@@ -252,14 +252,14 @@
 
 .form-header h2 {
   font-size: 28px;
-  color: #0f172a;
+  color: #ffffff;
   font-weight: 700;
   margin: 0 0 10px;
 }
 
 .form-header p {
   font-size: 14px;
-  color: #64748b;
+  color: #94a3b8;
   margin: 0;
 }
 
@@ -271,7 +271,7 @@
   display: block;
   font-size: 13px;
   font-weight: 600;
-  color: #1e293b;
+  color: #cbd5e1;
   margin-bottom: 8px;
 }
 
@@ -294,7 +294,8 @@
   border: 1px solid #e2e8f0;
   border-radius: 6px;
   font-size: 14px;
-  color: #334155;
+  color: #ffffff;
+  background-color: #1e293b;
   outline: none;
   transition: all 0.2s;
   font-family: inherit;
@@ -334,7 +335,7 @@
   align-items: center;
   gap: 8px;
   font-size: 13px;
-  color: #475569;
+  color: #cbd5e1;
   cursor: pointer;
 }
 
