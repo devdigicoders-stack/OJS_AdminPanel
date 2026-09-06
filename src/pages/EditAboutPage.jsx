@@ -150,7 +150,7 @@ const EditAboutPage = () => {
       const data = await response.json();
       if (response.ok) {
         toast.success("Image uploaded successfully");
-        const backendUrl = import.meta.env.VITE_API_URL.replace('/api', '');
+        const backendUrl = (import.meta.env.VITE_API_URL || 'https://api.praxis.org.in/api').replace(/\/api\/?$/, '');
         handleObjectArrayChange('team', index, 'img', `${backendUrl}${data.imageUrl}`);
       } else {
         toast.error(data.message || "Failed to upload image");

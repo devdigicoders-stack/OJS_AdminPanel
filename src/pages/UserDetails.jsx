@@ -87,7 +87,7 @@ const UserDetails = () => {
           <div className="profile-card hero-card">
             <div className="avatar-large-wrapper">
               {user.profilePic ? (
-                <img src={`${import.meta.env.VITE_API_URL.replace('/api', '')}${user.profilePic}`} alt="Profile" className="avatar-large-img" />
+                <img src={`${(import.meta.env.VITE_API_URL || 'https://api.praxis.org.in/api').replace(/\/api\/?$/, '')}${user.profilePic}`} alt="Profile" className="avatar-large-img" />
               ) : (
                 <div className={`avatar-large ${user.avatarColor || 'blue'}`}>
                   {user.initials || user.name.substring(0, 2).toUpperCase()}

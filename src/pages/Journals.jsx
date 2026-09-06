@@ -256,7 +256,7 @@ const Journals = () => {
                         title="Download PDF"
                         onClick={() => {
                           if (journal.mainFilePath) {
-                            const baseUrl = import.meta.env.VITE_API_URL.replace('/api', '');
+                            const baseUrl = (import.meta.env.VITE_API_URL || 'https://api.praxis.org.in/api').replace(/\/api\/?$/, '');
                             const fileUrl = `${baseUrl}/${journal.mainFilePath.replace(/\\/g, '/')}`;
                             window.open(fileUrl, '_blank');
                           } else {

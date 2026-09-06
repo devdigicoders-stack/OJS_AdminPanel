@@ -313,7 +313,7 @@ const Announcements = () => {
                       />
                       {modalType === 'edit' && selectedAnn?.mediaPath && (
                         <p style={{fontSize: '12px', marginTop: '4px', color: '#2563EB'}}>
-                          <a href={`${import.meta.env.VITE_API_URL.replace('/api', '')}/${selectedAnn.mediaPath}`} target="_blank" rel="noreferrer">
+                          <a href={`${(import.meta.env.VITE_API_URL || 'https://api.praxis.org.in/api').replace(/\/api\/?$/, '')}/${selectedAnn.mediaPath}`} target="_blank" rel="noreferrer">
                             View Current Media
                           </a>
                         </p>

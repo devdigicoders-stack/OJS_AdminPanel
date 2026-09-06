@@ -88,7 +88,7 @@ const ManageHero = () => {
       });
       const data = await res.json();
       if (res.ok) {
-        const backendUrl = import.meta.env.VITE_API_URL.replace('/api', '');
+        const backendUrl = (import.meta.env.VITE_API_URL || 'https://api.praxis.org.in/api').replace(/\/api\/?$/, '');
         const fullUrl = `${backendUrl}${data.imageUrl}`;
         setHero(prev => ({ ...prev, backgroundUrl: fullUrl }));
         setPreview(fullUrl);

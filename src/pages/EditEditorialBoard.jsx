@@ -3,6 +3,19 @@ import { toast } from 'react-hot-toast';
 import { MdSave, MdAdd, MdDelete } from 'react-icons/md';
 import './JournalPages.css';
 
+const cleanImageUrl = (url) => {
+  if (!url) return '';
+  let cleaned = url.trim();
+  cleaned = cleaned.replace(/^https?:\/\/\.praxis\.org\.in(\/api)?/, 'https://api.praxis.org.in');
+  cleaned = cleaned.replace('/api/uploads/', '/uploads/');
+  const backendBase = (import.meta.env.VITE_API_URL || 'https://api.praxis.org.in/api').replace(/\/api\/?$/, '');
+  cleaned = cleaned.replace(/^http:\/\/(localhost|127\.0\.0\.1):5000/, backendBase);
+  if (cleaned.startsWith('/uploads')) {
+    cleaned = `${backendBase}${cleaned}`;
+  }
+  return cleaned;
+};
+
 const EditEditorialBoard = () => {
   const [formData, setFormData] = useState({
     editorInChief: {
@@ -25,9 +38,13 @@ const EditEditorialBoard = () => {
         if (res.ok) {
           const data = await res.json();
           setOriginalData(data);
+          const sanitizedTeam = (data.team || []).map(member => ({
+            ...member,
+            img: cleanImageUrl(member.img)
+          }));
           setFormData({
             editorInChief: data.editorInChief || { name: '', affiliation: '', email: '' },
-            team: data.team || []
+            team: sanitizedTeam
           });
         }
       } catch (error) {
@@ -45,7 +62,9 @@ const EditEditorialBoard = () => {
       const cleanedData = {
         ...originalData,
         editorInChief: formData.editorInChief,
-        team: formData.team.filter(i => i.name.trim() !== '')
+        team: formData.team
+          .filter(i => i.name.trim() !== '')
+          .map(i => ({ ...i, img: cleanImageUrl(i.img) }))
       };
 
       const res = await fetch(`${import.meta.env.VITE_API_URL}/about-page`, {
@@ -118,8 +137,8 @@ const EditEditorialBoard = () => {
       const data = await response.json();
       if (response.ok) {
         toast.success("Image uploaded successfully");
-        const backendUrl = import.meta.env.VITE_API_URL.replace('/api', '');
-        handleObjectArrayChange('team', index, 'img', `${backendUrl}${data.imageUrl}`);
+        const backendUrl = (import.meta.env.VITE_API_URL || 'https://api.praxis.org.in/api').replace(/\/api\/?$/, '');
+        handleObjectArrayChange('team', index, 'img', cleanImageUrl(`${backendUrl}${data.imageUrl}`));
       } else {
         toast.error(data.message || "Failed to upload image");
       }

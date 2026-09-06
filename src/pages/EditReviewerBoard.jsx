@@ -3,6 +3,19 @@ import { toast } from 'react-hot-toast';
 import { MdSave, MdAdd, MdDelete } from 'react-icons/md';
 import './JournalPages.css';
 
+const cleanImageUrl = (url) => {
+  if (!url) return '';
+  let cleaned = url.trim();
+  cleaned = cleaned.replace(/^https?:\/\/\.praxis\.org\.in(\/api)?/, 'https://api.praxis.org.in');
+  cleaned = cleaned.replace('/api/uploads/', '/uploads/');
+  const backendBase = (import.meta.env.VITE_API_URL || 'https://api.praxis.org.in/api').replace(/\/api\/?$/, '');
+  cleaned = cleaned.replace(/^http:\/\/(localhost|127\.0\.0\.1):5000/, backendBase);
+  if (cleaned.startsWith('/uploads')) {
+    cleaned = `${backendBase}${cleaned}`;
+  }
+  return cleaned;
+};
+
 const EditReviewerBoard = () => {
   const [formData, setFormData] = useState({
     reviewerTeam: []
@@ -20,8 +33,12 @@ const EditReviewerBoard = () => {
         if (res.ok) {
           const data = await res.json();
           setOriginalData(data);
+          const sanitizedReviewerTeam = (data.reviewerTeam || []).map(member => ({
+            ...member,
+            img: cleanImageUrl(member.img)
+          }));
           setFormData({
-            reviewerTeam: data.reviewerTeam || []
+            reviewerTeam: sanitizedReviewerTeam
           });
         }
       } catch (error) {
@@ -38,7 +55,9 @@ const EditReviewerBoard = () => {
     try {
       const cleanedData = {
         ...originalData,
-        reviewerTeam: formData.reviewerTeam.filter(i => i.name.trim() !== '')
+        reviewerTeam: formData.reviewerTeam
+          .filter(i => i.name.trim() !== '')
+          .map(i => ({ ...i, img: cleanImageUrl(i.img) }))
       };
 
       const res = await fetch(`${import.meta.env.VITE_API_URL}/about-page`, {
@@ -101,8 +120,8 @@ const EditReviewerBoard = () => {
       const data = await response.json();
       if (response.ok) {
         toast.success("Image uploaded successfully");
-        const backendUrl = import.meta.env.VITE_API_URL.replace('/api', '');
-        handleObjectArrayChange('reviewerTeam', index, 'img', `${backendUrl}${data.imageUrl}`);
+        const backendUrl = (import.meta.env.VITE_API_URL || 'https://api.praxis.org.in/api').replace(/\/api\/?$/, '');
+        handleObjectArrayChange('reviewerTeam', index, 'img', cleanImageUrl(`${backendUrl}${data.imageUrl}`));
       } else {
         toast.error(data.message || "Failed to upload image");
       }
