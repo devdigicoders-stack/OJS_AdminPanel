@@ -108,6 +108,8 @@ const EditReviewerBoard = () => {
     const uploadData = new FormData();
     uploadData.append('image', file);
 
+    const toastId = toast.loading("Uploading image...");
+
     try {
       const response = await fetch(`${import.meta.env.VITE_API_URL}/about-page/upload-image`, {
         method: 'POST',
@@ -119,14 +121,40 @@ const EditReviewerBoard = () => {
 
       const data = await response.json();
       if (response.ok) {
-        toast.success("Image uploaded successfully");
         const backendUrl = (import.meta.env.VITE_API_URL || 'https://api.praxis.org.in/api').replace(/\/api\/?$/, '');
-        handleObjectArrayChange('reviewerTeam', index, 'img', cleanImageUrl(`${backendUrl}${data.imageUrl}`));
+        const newImgUrl = cleanImageUrl(`${backendUrl}${data.imageUrl}`);
+        
+        const newTeam = [...formData.reviewerTeam];
+        newTeam[index] = { ...newTeam[index], img: newImgUrl };
+        setFormData(prev => ({ ...prev, reviewerTeam: newTeam }));
+
+        // Auto-save immediately to database so refresh won't revert it
+        const cleanedData = {
+          ...originalData,
+          reviewerTeam: newTeam
+            .filter(i => i.name.trim() !== '')
+            .map(i => ({ ...i, img: cleanImageUrl(i.img) }))
+        };
+
+        const saveRes = await fetch(`${import.meta.env.VITE_API_URL}/about-page`, {
+          method: 'PUT',
+          headers: { 
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${localStorage.getItem('adminToken')}`
+          },
+          body: JSON.stringify(cleanedData)
+        });
+
+        if (saveRes.ok) {
+          toast.success("Image uploaded & saved successfully!", { id: toastId });
+        } else {
+          toast.success("Image uploaded. Please click 'Save Changes' to save.", { id: toastId });
+        }
       } else {
-        toast.error(data.message || "Failed to upload image");
+        toast.error(data.message || "Failed to upload image", { id: toastId });
       }
     } catch (error) {
-      toast.error("Error uploading image");
+      toast.error("Error uploading image", { id: toastId });
       console.error(error);
     }
   };
