@@ -5,6 +5,7 @@ import {
   MdDashboard,
   MdPeople,
   MdLibraryBooks,
+  MdCloudUpload,
   MdSync,
   MdFactCheck,
   MdSend,
@@ -71,6 +72,11 @@ const Sidebar = ({ isOpen }) => {
         <NavLink to="/journals" className={({ isActive }) => isActive ? "sidebar-item active" : "sidebar-item"}>
           <span className="icon"><MdLibraryBooks /></span>
           Manage Journals
+        </NavLink>
+
+        <NavLink to="/upload-journal" className={({ isActive }) => isActive ? "sidebar-item active" : "sidebar-item"}>
+          <span className="icon"><MdCloudUpload /></span>
+          Upload Journal
         </NavLink>
 
         <NavLink to="/update-status" className={({ isActive }) => isActive ? "sidebar-item active" : "sidebar-item"}>

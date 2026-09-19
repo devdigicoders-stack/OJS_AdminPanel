@@ -5,6 +5,7 @@ import Login from './pages/Login';
 import Users from './pages/Users';
 import Journals from './pages/Journals';
 import JournalDetails from './pages/JournalDetails';
+import UploadJournal from './pages/UploadJournal';
 import UserDetails from './pages/UserDetails';
 import Announcements from './pages/Announcements';
 import Reports from './pages/Reports';
@@ -43,6 +44,7 @@ function App() {
           <Route path="users/:id" element={<UserDetails />} />
           <Route path="journals" element={<Journals />} />
           <Route path="journals/:id" element={<JournalDetails />} />
+          <Route path="upload-journal" element={<UploadJournal />} />
           <Route path="update-status" element={<UpdateStatus />} />
           <Route path="approve-reject" element={<ApproveReject />} />
           <Route path="publish" element={<Publish />} />

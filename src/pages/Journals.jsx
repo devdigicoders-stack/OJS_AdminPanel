@@ -12,6 +12,7 @@ import {
   MdClose,
   MdFileDownload,
   MdPersonAdd,
+  MdCloudUpload,
   MdCheck
 } from 'react-icons/md';
 import toast from 'react-hot-toast';
@@ -149,9 +150,30 @@ const Journals = () => {
   return (
     <div className="journals-container">
       
-      <div className="page-header">
-        <h1 className="page-title">Manage Journals</h1>
-        <p className="breadcrumb">Dashboard / <span>Manage Journals</span></p>
+      <div className="page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '14px' }}>
+        <div>
+          <h1 className="page-title">Manage Journals</h1>
+          <p className="breadcrumb">Dashboard / <span>Manage Journals</span></p>
+        </div>
+        <button
+          onClick={() => navigate('/upload-journal')}
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '8px',
+            background: '#2563eb',
+            color: '#ffffff',
+            border: 'none',
+            padding: '10px 18px',
+            borderRadius: '10px',
+            fontSize: '13.5px',
+            fontWeight: 600,
+            cursor: 'pointer',
+            boxShadow: '0 4px 12px rgba(37,99,235,0.25)'
+          }}
+        >
+          <MdCloudUpload size={18} /> Upload Journal
+        </button>
       </div>
 
       <div className="stats-row">
