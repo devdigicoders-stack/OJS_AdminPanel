@@ -585,7 +585,7 @@ const JournalDetails = () => {
                   onChange={(e) => setSelectedReviewer(e.target.value)}
                   className="reviewer-select"
                 >
-                  <option value="">-- Choose Reviewer --</option>
+                  <option value="">{reviewers.length === 0 ? '-- No Reviewers in Database --' : '-- Choose Reviewer --'}</option>
                   {reviewers.map(r => (
                     <option key={r._id} value={r._id}>{r.name} ({r.email})</option>
                   ))}
@@ -598,6 +598,11 @@ const JournalDetails = () => {
                   {assigningReviewer ? 'Assigning...' : 'Assign'}
                 </button>
               </div>
+              {reviewers.length === 0 && (
+                <p style={{ fontSize: '11.5px', color: '#64748b', margin: '6px 0 0', lineHeight: 1.4 }}>
+                  💡 <em>Tip: Manage Users me jaakar kisi user ka Role <strong>"Reviewer"</strong> create/edit karein.</em>
+                </p>
+              )}
             </div>
           </div>
 
