@@ -228,42 +228,62 @@ const JournalDetails = () => {
   };
 
   const handlePublish = () => {
+    const currentYear = journal.publicationYear || (journal.publishDate ? new Date(journal.publishDate).getFullYear().toString() : new Date().getFullYear().toString());
+    const currentMonth = journal.publicationMonth || (journal.publishDate ? new Date(journal.publishDate).toLocaleString('default', { month: 'long' }) : new Date().toLocaleString('default', { month: 'long' }));
+
     Swal.fire({
-      title: 'Publish Journal',
+      title: journal.status === 'Published' ? 'Edit Publication Details' : 'Publish Journal',
       html: `
         <div style="text-align: left; display: flex; flex-direction: column; gap: 12px; margin-top: 10px;">
-          <div>
-            <label style="font-size: 13px; font-weight: 600; color: #374151;">Volume</label>
-            <input id="swal-vol" class="swal2-input" style="margin: 4px 0 0; width: 100%;" placeholder="e.g. Vol 1" value="${journal.volume !== '-' ? journal.volume : 'Vol 1'}">
+          <div style="display: flex; gap: 10px;">
+            <div style="flex: 1;">
+              <label style="font-size: 13px; font-weight: 600; color: #374151;">Volume</label>
+              <input id="swal-vol" class="swal2-input" style="margin: 4px 0 0; width: 100%;" placeholder="e.g. Vol 1" value="${journal.volume && journal.volume !== '-' ? journal.volume : 'Vol 1'}">
+            </div>
+            <div style="flex: 1;">
+              <label style="font-size: 13px; font-weight: 600; color: #374151;">Issue</label>
+              <input id="swal-issue" class="swal2-input" style="margin: 4px 0 0; width: 100%;" placeholder="e.g. Issue 1" value="${journal.issue && journal.issue !== '-' ? journal.issue : 'Issue 1'}">
+            </div>
           </div>
-          <div>
-            <label style="font-size: 13px; font-weight: 600; color: #374151;">Issue</label>
-            <input id="swal-issue" class="swal2-input" style="margin: 4px 0 0; width: 100%;" placeholder="e.g. Issue 1" value="${journal.issue !== '-' ? journal.issue : 'Issue 1'}">
+          <div style="display: flex; gap: 10px;">
+            <div style="flex: 1;">
+              <label style="font-size: 13px; font-weight: 600; color: #374151;">Publication Month</label>
+              <input id="swal-month" class="swal2-input" style="margin: 4px 0 0; width: 100%;" placeholder="e.g. September or Jan - Jun" value="${currentMonth}">
+            </div>
+            <div style="flex: 1;">
+              <label style="font-size: 13px; font-weight: 600; color: #374151;">Publication Year</label>
+              <input id="swal-year" class="swal2-input" style="margin: 4px 0 0; width: 100%;" placeholder="e.g. 2026" value="${currentYear}">
+            </div>
           </div>
           <div>
             <label style="font-size: 13px; font-weight: 600; color: #374151;">DOI Number (Optional)</label>
-            <input id="swal-doi" class="swal2-input" style="margin: 4px 0 0; width: 100%;" placeholder="e.g. 10.1234/praxis.2024.01" value="${journal.doi !== '-' ? journal.doi : ''}">
+            <input id="swal-doi" class="swal2-input" style="margin: 4px 0 0; width: 100%;" placeholder="e.g. 10.1234/praxis.2024.01" value="${journal.doi && journal.doi !== '-' ? journal.doi : ''}">
           </div>
         </div>
       `,
       focusConfirm: false,
       showCancelButton: true,
-      confirmButtonText: 'Publish Now',
+      confirmButtonText: journal.status === 'Published' ? 'Save Details' : 'Publish Now',
       confirmButtonColor: '#2563eb',
       cancelButtonColor: '#64748b',
       preConfirm: () => {
         return {
           volume: document.getElementById('swal-vol').value || 'Vol 1',
           issue: document.getElementById('swal-issue').value || 'Issue 1',
+          publicationMonth: document.getElementById('swal-month').value || '',
+          publicationYear: document.getElementById('swal-year').value || '',
           doi: document.getElementById('swal-doi').value || '-',
-          publishDate: new Date()
+          publishDate: journal.publishDate || new Date()
         };
       }
     }).then(async (result) => {
       if (result.isConfirmed) {
         const success = await updateBackendStatus('Published', result.value);
-        if (success) toast.success('Journal Published successfully to Website!');
-        else toast.error('Failed to publish journal');
+        if (success) {
+          toast.success(journal.status === 'Published' ? 'Publication Details Updated!' : 'Journal Published successfully to Website!');
+          setJournal(prev => ({ ...prev, ...result.value, status: 'Published' }));
+        }
+        else toast.error('Failed to update publication details');
       }
     });
   };
@@ -370,13 +390,37 @@ const JournalDetails = () => {
 
             {/* Publication metadata if published */}
             {(journal.status === 'Published' || journal.volume !== '-' || journal.issue !== '-') && (
-              <div className="pub-meta-banner">
-                <div><strong>Volume:</strong> {journal.volume || 'Vol 1'}</div>
-                <div><strong>Issue:</strong> {journal.issue || 'Issue 1'}</div>
-                <div><strong>DOI:</strong> {journal.doi || 'Not assigned'}</div>
-                {journal.publishDate && (
-                  <div><strong>Published:</strong> {new Date(journal.publishDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}</div>
-                )}
+              <div className="pub-meta-banner" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
+                <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', alignItems: 'center' }}>
+                  <div><strong>Volume:</strong> {journal.volume || 'Vol 1'}</div>
+                  <div><strong>Issue:</strong> {journal.issue || 'Issue 1'}</div>
+                  {(journal.publicationMonth || journal.publishDate) && (
+                    <div><strong>Month:</strong> {journal.publicationMonth || new Date(journal.publishDate).toLocaleString('default', { month: 'long' })}</div>
+                  )}
+                  {(journal.publicationYear || journal.publishDate) && (
+                    <div><strong>Year:</strong> {journal.publicationYear || new Date(journal.publishDate).getFullYear()}</div>
+                  )}
+                  <div><strong>DOI:</strong> {journal.doi || 'Not assigned'}</div>
+                  {journal.publishDate && (
+                    <div><strong>Published:</strong> {new Date(journal.publishDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}</div>
+                  )}
+                </div>
+                <button 
+                  onClick={handlePublish}
+                  style={{
+                    background: '#2563eb',
+                    color: '#ffffff',
+                    border: 'none',
+                    borderRadius: '6px',
+                    padding: '6px 14px',
+                    fontSize: '13px',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    boxShadow: '0 2px 6px rgba(37, 99, 235, 0.25)'
+                  }}
+                >
+                  Edit Publication Details
+                </button>
               </div>
             )}
           </div>

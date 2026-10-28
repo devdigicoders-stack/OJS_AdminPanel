@@ -27,8 +27,10 @@ const Publish = () => {
   // Publish Form State
   const [publishForm, setPublishForm] = useState({
     doi: '',
-    volume: 'Vol. 12',
-    issue: 'Issue 3'
+    volume: 'Vol. 1',
+    issue: 'Issue 1',
+    publicationYear: new Date().getFullYear().toString(),
+    publicationMonth: new Date().toLocaleString('default', { month: 'long' })
   });
 
   useEffect(() => {
@@ -93,7 +95,14 @@ const Publish = () => {
 
   const handleActionClick = (journal) => {
     setSelectedJournal(journal);
-    setPublishForm({ doi: `10.1234/ojs.${journal.id.toLowerCase()}`, volume: 'Vol. 12', issue: 'Issue 3' });
+    const now = new Date();
+    setPublishForm({
+      doi: journal.doi && journal.doi !== '-' ? journal.doi : `10.1234/praxis.${(journal.journalId || journal.id || 'j').toLowerCase()}`,
+      volume: journal.volume && journal.volume !== '-' ? journal.volume : 'Vol 1',
+      issue: journal.issue && journal.issue !== '-' ? journal.issue : 'Issue 1',
+      publicationYear: journal.publicationYear || now.getFullYear().toString(),
+      publicationMonth: journal.publicationMonth || now.toLocaleString('default', { month: 'long' })
+    });
     setIsModalOpen(true);
   };
 
@@ -114,7 +123,9 @@ const Publish = () => {
         body: JSON.stringify({
           doi: publishForm.doi,
           volume: publishForm.volume,
-          issue: publishForm.issue
+          issue: publishForm.issue,
+          publicationYear: publishForm.publicationYear,
+          publicationMonth: publishForm.publicationMonth
         })
       });
 
@@ -301,6 +312,7 @@ const Publish = () => {
                     <label>Volume</label>
                     <input 
                       type="text" 
+                      placeholder="e.g. Vol 1"
                       value={publishForm.volume}
                       onChange={(e) => setPublishForm({...publishForm, volume: e.target.value})}
                     />
@@ -309,8 +321,29 @@ const Publish = () => {
                     <label>Issue</label>
                     <input 
                       type="text" 
+                      placeholder="e.g. Issue 1"
                       value={publishForm.issue}
                       onChange={(e) => setPublishForm({...publishForm, issue: e.target.value})}
+                    />
+                  </div>
+                </div>
+                <div className="form-row">
+                  <div className="form-group">
+                    <label>Publication Month</label>
+                    <input 
+                      type="text" 
+                      placeholder="e.g. September or Jan - Jun"
+                      value={publishForm.publicationMonth}
+                      onChange={(e) => setPublishForm({...publishForm, publicationMonth: e.target.value})}
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>Publication Year</label>
+                    <input 
+                      type="text" 
+                      placeholder="e.g. 2026"
+                      value={publishForm.publicationYear}
+                      onChange={(e) => setPublishForm({...publishForm, publicationYear: e.target.value})}
                     />
                   </div>
                 </div>
