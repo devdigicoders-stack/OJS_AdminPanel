@@ -308,11 +308,16 @@ const EditAboutPage = () => {
       </div>
 
       <div className="card-panel">
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '10px' }}>
           <h2>Editorial Board</h2>
-          <button className="btn-secondary-action" onClick={() => addObjectArrayItem('team', { name: '', role: '', universityUrl: '', img: '' })} style={{ padding: '6px 14px', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '4px' }}>
-            <MdAdd /> Add Member
-          </button>
+          <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+            <button className="btn-secondary-action" onClick={() => addObjectArrayItem('team', { name: '', role: '', universityUrl: '', img: '' })} style={{ padding: '8px 14px', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <MdAdd size={16} /> Add Member
+            </button>
+            <button className="btn-primary-action" onClick={handleSave} disabled={loading} style={{ padding: '8px 18px', fontSize: '13px' }}>
+              <MdSave size={16} /> {loading ? 'Saving...' : 'Save Changes'}
+            </button>
+          </div>
         </div>
         {formData.team.map((item, i) => (
           <div 

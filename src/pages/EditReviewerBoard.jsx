@@ -182,11 +182,16 @@ const EditReviewerBoard = () => {
       </div>
 
       <div className="card-panel">
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '10px' }}>
           <h2>Reviewer Board Members</h2>
-          <button className="btn-secondary-action" onClick={() => addObjectArrayItem('reviewerTeam', { name: '', role: '', universityUrl: '', img: '' })} style={{ padding: '6px 14px', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '4px' }}>
-            <MdAdd /> Add Member
-          </button>
+          <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+            <button className="btn-secondary-action" onClick={() => addObjectArrayItem('reviewerTeam', { name: '', role: '', universityUrl: '', img: '' })} style={{ padding: '8px 14px', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <MdAdd size={16} /> Add Member
+            </button>
+            <button className="btn-primary-action" onClick={handleSave} disabled={loading} style={{ padding: '8px 18px', fontSize: '13px' }}>
+              <MdSave size={16} /> {loading ? 'Saving...' : 'Save Changes'}
+            </button>
+          </div>
         </div>
         {formData.reviewerTeam.map((item, i) => (
           <div 
@@ -254,6 +259,49 @@ const EditReviewerBoard = () => {
             </div>
           </div>
         ))}
+
+        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '20px', paddingTop: '16px', borderTop: '1px solid #e2e8f0', flexWrap: 'wrap' }}>
+          <button className="btn-secondary-action" onClick={() => addObjectArrayItem('reviewerTeam', { name: '', role: '', universityUrl: '', img: '' })} style={{ padding: '10px 18px', fontSize: '14px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <MdAdd size={18} /> Add Member
+          </button>
+          <button className="btn-primary-action" onClick={handleSave} disabled={loading} style={{ padding: '10px 24px', fontSize: '14px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <MdSave size={18} /> {loading ? 'Saving...' : 'Save All Changes'}
+          </button>
+        </div>
+      </div>
+
+      {/* Floating / Sticky Save Bar */}
+      <div style={{
+        position: 'fixed',
+        bottom: '24px',
+        right: '28px',
+        zIndex: 999,
+        background: '#ffffff',
+        padding: '8px 18px',
+        borderRadius: '50px',
+        boxShadow: '0 8px 30px rgba(0, 0, 0, 0.18)',
+        border: '1px solid #e2e8f0',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '14px'
+      }}>
+        <span style={{ fontSize: '13px', color: '#64748b', fontWeight: 600 }}>
+          {formData.reviewerTeam.length} Reviewers
+        </span>
+        <button 
+          className="btn-primary-action" 
+          onClick={handleSave} 
+          disabled={loading}
+          style={{ 
+            borderRadius: '50px', 
+            padding: '10px 22px', 
+            fontSize: '14px', 
+            boxShadow: '0 4px 12px rgba(59, 130, 246, 0.35)',
+            cursor: 'pointer'
+          }}
+        >
+          <MdSave size={18} /> {loading ? 'Saving...' : 'Save Changes'}
+        </button>
       </div>
     </div>
   );
