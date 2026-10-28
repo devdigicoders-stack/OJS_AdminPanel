@@ -21,7 +21,8 @@ const EditEditorialBoard = () => {
     editorInChief: {
       name: '',
       affiliation: '',
-      email: ''
+      email: '',
+      universityUrl: ''
     },
     team: []
   });
@@ -40,10 +41,16 @@ const EditEditorialBoard = () => {
           setOriginalData(data);
           const sanitizedTeam = (data.team || []).map(member => ({
             ...member,
+            universityUrl: member.universityUrl || '',
             img: cleanImageUrl(member.img)
           }));
           setFormData({
-            editorInChief: data.editorInChief || { name: '', affiliation: '', email: '' },
+            editorInChief: {
+              name: data.editorInChief?.name || '',
+              affiliation: data.editorInChief?.affiliation || '',
+              email: data.editorInChief?.email || '',
+              universityUrl: data.editorInChief?.universityUrl || ''
+            },
             team: sanitizedTeam
           });
         }
@@ -64,7 +71,11 @@ const EditEditorialBoard = () => {
         editorInChief: formData.editorInChief,
         team: formData.team
           .filter(i => i.name.trim() !== '')
-          .map(i => ({ ...i, img: cleanImageUrl(i.img) }))
+          .map(i => ({ 
+            ...i, 
+            universityUrl: (i.universityUrl || '').trim(),
+            img: cleanImageUrl(i.img) 
+          }))
       };
 
       const res = await fetch(`${import.meta.env.VITE_API_URL}/about-page`, {
@@ -151,7 +162,11 @@ const EditEditorialBoard = () => {
           editorInChief: formData.editorInChief,
           team: newTeam
             .filter(i => i.name.trim() !== '')
-            .map(i => ({ ...i, img: cleanImageUrl(i.img) }))
+            .map(i => ({ 
+              ...i, 
+              universityUrl: (i.universityUrl || '').trim(),
+              img: cleanImageUrl(i.img) 
+            }))
         };
 
         const saveRes = await fetch(`${import.meta.env.VITE_API_URL}/about-page`, {
@@ -198,7 +213,7 @@ const EditEditorialBoard = () => {
             name="name"
             value={formData.editorInChief?.name || ''} 
             onChange={handleEditorChange} 
-            style={{ padding: '8px', border: '1px solid #cbd5e1', borderRadius: '4px' }}
+            style={{ padding: '10px 12px', border: '1px solid #cbd5e1', borderRadius: '6px' }}
             placeholder="Name (e.g. Prof. John Doe)"
           />
           <input 
@@ -206,7 +221,7 @@ const EditEditorialBoard = () => {
             name="affiliation"
             value={formData.editorInChief?.affiliation || ''} 
             onChange={handleEditorChange} 
-            style={{ padding: '8px', border: '1px solid #cbd5e1', borderRadius: '4px' }}
+            style={{ padding: '10px 12px', border: '1px solid #cbd5e1', borderRadius: '6px' }}
             placeholder="Affiliation (e.g. Stanford University)"
           />
           <input 
@@ -214,8 +229,16 @@ const EditEditorialBoard = () => {
             name="email"
             value={formData.editorInChief?.email || ''} 
             onChange={handleEditorChange} 
-            style={{ padding: '8px', border: '1px solid #cbd5e1', borderRadius: '4px' }}
+            style={{ padding: '10px 12px', border: '1px solid #cbd5e1', borderRadius: '6px' }}
             placeholder="Email Address"
+          />
+          <input 
+            type="url" 
+            name="universityUrl"
+            value={formData.editorInChief?.universityUrl || ''} 
+            onChange={handleEditorChange} 
+            style={{ padding: '10px 12px', border: '1px solid #cbd5e1', borderRadius: '6px' }}
+            placeholder="University / Profile Link (e.g. https://...)"
           />
         </div>
       </div>
@@ -223,47 +246,74 @@ const EditEditorialBoard = () => {
       <div className="card-panel">
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
           <h2>Editorial Board Members</h2>
-          <button className="btn-secondary-action" onClick={() => addObjectArrayItem('team', { name: '', role: '', img: '' })} style={{ padding: '4px 10px', fontSize: '13px' }}>
+          <button className="btn-secondary-action" onClick={() => addObjectArrayItem('team', { name: '', role: '', universityUrl: '', img: '' })} style={{ padding: '6px 14px', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '4px' }}>
             <MdAdd /> Add Member
           </button>
         </div>
         {formData.team.map((item, i) => (
-          <div key={i} style={{ display: 'flex', gap: '10px', marginBottom: '10px', flexWrap: 'wrap' }}>
-            <input 
-              type="text" 
-              value={item.name} 
-              onChange={(e) => handleObjectArrayChange('team', i, 'name', e.target.value)} 
-              style={{ flex: 1, minWidth: '200px', padding: '8px', border: '1px solid #cbd5e1', borderRadius: '4px' }}
-              placeholder="Name"
-            />
-            <input 
-              type="text" 
-              value={item.role} 
-              onChange={(e) => handleObjectArrayChange('team', i, 'role', e.target.value)} 
-              style={{ flex: 1, minWidth: '200px', padding: '8px', border: '1px solid #cbd5e1', borderRadius: '4px' }}
-              placeholder="Role / Affiliation"
-            />
-            <div style={{ display: 'flex', flex: 1, minWidth: '250px', gap: '5px' }}>
+          <div 
+            key={i} 
+            style={{ 
+              display: 'flex', 
+              flexDirection: 'column', 
+              gap: '10px', 
+              marginBottom: '14px', 
+              padding: '14px', 
+              background: '#f8fafc', 
+              borderRadius: '8px', 
+              border: '1px solid #e2e8f0' 
+            }}
+          >
+            <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
               <input 
                 type="text" 
-                value={item.img} 
-                onChange={(e) => handleObjectArrayChange('team', i, 'img', e.target.value)} 
-                style={{ flex: 1, padding: '8px', border: '1px solid #cbd5e1', borderRadius: '4px' }}
-                placeholder="Image URL or Upload ->"
+                value={item.name || ''} 
+                onChange={(e) => handleObjectArrayChange('team', i, 'name', e.target.value)} 
+                style={{ flex: 1, minWidth: '220px', padding: '9px 12px', border: '1px solid #cbd5e1', borderRadius: '6px', background: '#fff' }}
+                placeholder="Name (e.g. Dr. Chittranjan Senapati)"
               />
-              <label style={{ cursor: 'pointer', background: '#3b82f6', color: 'white', padding: '8px 12px', borderRadius: '4px', fontSize: '13px', display: 'flex', alignItems: 'center' }}>
-                Upload
-                <input 
-                  type="file" 
-                  accept="image/*" 
-                  style={{ display: 'none' }}
-                  onChange={(e) => handleImageUpload(e, i)}
-                />
-              </label>
+              <input 
+                type="text" 
+                value={item.role || ''} 
+                onChange={(e) => handleObjectArrayChange('team', i, 'role', e.target.value)} 
+                style={{ flex: 1.5, minWidth: '250px', padding: '9px 12px', border: '1px solid #cbd5e1', borderRadius: '6px', background: '#fff' }}
+                placeholder="Role / Affiliation"
+              />
             </div>
-            <button onClick={() => removeObjectArrayItem('team', i)} style={{ background: '#ef4444', color: 'white', border: 'none', borderRadius: '4px', padding: '0 10px', cursor: 'pointer' }}>
-              <MdDelete />
-            </button>
+            <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+              <input 
+                type="url" 
+                value={item.universityUrl || ''} 
+                onChange={(e) => handleObjectArrayChange('team', i, 'universityUrl', e.target.value)} 
+                style={{ flex: 1.2, minWidth: '220px', padding: '9px 12px', border: '1px solid #cbd5e1', borderRadius: '6px', background: '#fff' }}
+                placeholder="University / Profile Link (e.g. https://...)"
+              />
+              <div style={{ display: 'flex', flex: 1, minWidth: '250px', gap: '6px' }}>
+                <input 
+                  type="text" 
+                  value={item.img || ''} 
+                  onChange={(e) => handleObjectArrayChange('team', i, 'img', e.target.value)} 
+                  style={{ flex: 1, padding: '9px 12px', border: '1px solid #cbd5e1', borderRadius: '6px', background: '#fff' }}
+                  placeholder="Image URL or Upload ->"
+                />
+                <label style={{ cursor: 'pointer', background: '#3b82f6', color: 'white', padding: '9px 14px', borderRadius: '6px', fontSize: '13px', fontWeight: '500', display: 'flex', alignItems: 'center', whiteSpace: 'nowrap' }}>
+                  Upload
+                  <input 
+                    type="file" 
+                    accept="image/*" 
+                    style={{ display: 'none' }}
+                    onChange={(e) => handleImageUpload(e, i)}
+                  />
+                </label>
+              </div>
+              <button 
+                onClick={() => removeObjectArrayItem('team', i)} 
+                title="Delete member"
+                style={{ background: '#ef4444', color: 'white', border: 'none', borderRadius: '6px', padding: '0 14px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+              >
+                <MdDelete size={18} />
+              </button>
+            </div>
           </div>
         ))}
       </div>

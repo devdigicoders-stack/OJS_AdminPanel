@@ -35,6 +35,7 @@ const EditReviewerBoard = () => {
           setOriginalData(data);
           const sanitizedReviewerTeam = (data.reviewerTeam || []).map(member => ({
             ...member,
+            universityUrl: member.universityUrl || '',
             img: cleanImageUrl(member.img)
           }));
           setFormData({
@@ -57,7 +58,11 @@ const EditReviewerBoard = () => {
         ...originalData,
         reviewerTeam: formData.reviewerTeam
           .filter(i => i.name.trim() !== '')
-          .map(i => ({ ...i, img: cleanImageUrl(i.img) }))
+          .map(i => ({ 
+            ...i, 
+            universityUrl: (i.universityUrl || '').trim(),
+            img: cleanImageUrl(i.img) 
+          }))
       };
 
       const res = await fetch(`${import.meta.env.VITE_API_URL}/about-page`, {
@@ -133,7 +138,11 @@ const EditReviewerBoard = () => {
           ...originalData,
           reviewerTeam: newTeam
             .filter(i => i.name.trim() !== '')
-            .map(i => ({ ...i, img: cleanImageUrl(i.img) }))
+            .map(i => ({ 
+              ...i, 
+              universityUrl: (i.universityUrl || '').trim(),
+              img: cleanImageUrl(i.img) 
+            }))
         };
 
         const saveRes = await fetch(`${import.meta.env.VITE_API_URL}/about-page`, {
@@ -175,47 +184,74 @@ const EditReviewerBoard = () => {
       <div className="card-panel">
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
           <h2>Reviewer Board Members</h2>
-          <button className="btn-secondary-action" onClick={() => addObjectArrayItem('reviewerTeam', { name: '', role: '', img: '' })} style={{ padding: '4px 10px', fontSize: '13px' }}>
+          <button className="btn-secondary-action" onClick={() => addObjectArrayItem('reviewerTeam', { name: '', role: '', universityUrl: '', img: '' })} style={{ padding: '6px 14px', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '4px' }}>
             <MdAdd /> Add Member
           </button>
         </div>
         {formData.reviewerTeam.map((item, i) => (
-          <div key={i} style={{ display: 'flex', gap: '10px', marginBottom: '10px', flexWrap: 'wrap' }}>
-            <input 
-              type="text" 
-              value={item.name} 
-              onChange={(e) => handleObjectArrayChange('reviewerTeam', i, 'name', e.target.value)} 
-              style={{ flex: 1, minWidth: '200px', padding: '8px', border: '1px solid #cbd5e1', borderRadius: '4px' }}
-              placeholder="Name"
-            />
-            <input 
-              type="text" 
-              value={item.role} 
-              onChange={(e) => handleObjectArrayChange('reviewerTeam', i, 'role', e.target.value)} 
-              style={{ flex: 1, minWidth: '200px', padding: '8px', border: '1px solid #cbd5e1', borderRadius: '4px' }}
-              placeholder="Role / Affiliation"
-            />
-            <div style={{ display: 'flex', flex: 1, minWidth: '250px', gap: '5px' }}>
+          <div 
+            key={i} 
+            style={{ 
+              display: 'flex', 
+              flexDirection: 'column', 
+              gap: '10px', 
+              marginBottom: '14px', 
+              padding: '14px', 
+              background: '#f8fafc', 
+              borderRadius: '8px', 
+              border: '1px solid #e2e8f0' 
+            }}
+          >
+            <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
               <input 
                 type="text" 
-                value={item.img} 
-                onChange={(e) => handleObjectArrayChange('reviewerTeam', i, 'img', e.target.value)} 
-                style={{ flex: 1, padding: '8px', border: '1px solid #cbd5e1', borderRadius: '4px' }}
-                placeholder="Image URL or Upload ->"
+                value={item.name || ''} 
+                onChange={(e) => handleObjectArrayChange('reviewerTeam', i, 'name', e.target.value)} 
+                style={{ flex: 1, minWidth: '220px', padding: '9px 12px', border: '1px solid #cbd5e1', borderRadius: '6px', background: '#fff' }}
+                placeholder="Name"
               />
-              <label style={{ cursor: 'pointer', background: '#3b82f6', color: 'white', padding: '8px 12px', borderRadius: '4px', fontSize: '13px', display: 'flex', alignItems: 'center' }}>
-                Upload
-                <input 
-                  type="file" 
-                  accept="image/*" 
-                  style={{ display: 'none' }}
-                  onChange={(e) => handleImageUpload(e, i)}
-                />
-              </label>
+              <input 
+                type="text" 
+                value={item.role || ''} 
+                onChange={(e) => handleObjectArrayChange('reviewerTeam', i, 'role', e.target.value)} 
+                style={{ flex: 1.5, minWidth: '250px', padding: '9px 12px', border: '1px solid #cbd5e1', borderRadius: '6px', background: '#fff' }}
+                placeholder="Role / Affiliation"
+              />
             </div>
-            <button onClick={() => removeObjectArrayItem('reviewerTeam', i)} style={{ background: '#ef4444', color: 'white', border: 'none', borderRadius: '4px', padding: '0 10px', cursor: 'pointer' }}>
-              <MdDelete />
-            </button>
+            <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+              <input 
+                type="url" 
+                value={item.universityUrl || ''} 
+                onChange={(e) => handleObjectArrayChange('reviewerTeam', i, 'universityUrl', e.target.value)} 
+                style={{ flex: 1.2, minWidth: '220px', padding: '9px 12px', border: '1px solid #cbd5e1', borderRadius: '6px', background: '#fff' }}
+                placeholder="University / Profile Link (e.g. https://...)"
+              />
+              <div style={{ display: 'flex', flex: 1, minWidth: '250px', gap: '6px' }}>
+                <input 
+                  type="text" 
+                  value={item.img || ''} 
+                  onChange={(e) => handleObjectArrayChange('reviewerTeam', i, 'img', e.target.value)} 
+                  style={{ flex: 1, padding: '9px 12px', border: '1px solid #cbd5e1', borderRadius: '6px', background: '#fff' }}
+                  placeholder="Image URL or Upload ->"
+                />
+                <label style={{ cursor: 'pointer', background: '#3b82f6', color: 'white', padding: '9px 14px', borderRadius: '6px', fontSize: '13px', fontWeight: '500', display: 'flex', alignItems: 'center', whiteSpace: 'nowrap' }}>
+                  Upload
+                  <input 
+                    type="file" 
+                    accept="image/*" 
+                    style={{ display: 'none' }}
+                    onChange={(e) => handleImageUpload(e, i)}
+                  />
+                </label>
+              </div>
+              <button 
+                onClick={() => removeObjectArrayItem('reviewerTeam', i)} 
+                title="Delete member"
+                style={{ background: '#ef4444', color: 'white', border: 'none', borderRadius: '6px', padding: '0 14px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+              >
+                <MdDelete size={18} />
+              </button>
+            </div>
           </div>
         ))}
       </div>
