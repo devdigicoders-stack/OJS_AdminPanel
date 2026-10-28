@@ -60,6 +60,11 @@ const UploadJournal = () => {
     phoneCode: '+91',
     phone: '',
     isSameAuthor: true,
+    volume: '',
+    issue: '',
+    publicationMonth: '',
+    publicationYear: '',
+    doi: '',
   });
   const [keywords, setKeywords] = useState([]);
   const [newKeyword, setNewKeyword] = useState('');
@@ -224,6 +229,11 @@ const UploadJournal = () => {
           data.append('phoneCode', formData.phoneCode);
           data.append('coAuthors', formData.coAuthors);
           data.append('isSameAuthor', formData.isSameAuthor);
+          if (formData.volume) data.append('volume', formData.volume);
+          if (formData.issue) data.append('issue', formData.issue);
+          if (formData.publicationMonth) data.append('publicationMonth', formData.publicationMonth);
+          if (formData.publicationYear) data.append('publicationYear', formData.publicationYear);
+          if (formData.doi) data.append('doi', formData.doi);
 
           if (mainFile) {
             data.append('mainFile', mainFile);
@@ -602,6 +612,26 @@ const UploadJournal = () => {
                       <div>
                         <label style={labelStyle}>Number of Pages <span style={{ color: '#EF4444' }}>*</span></label>
                         <input type="number" name="pages" value={formData.pages} onChange={handleInputChange} placeholder="Ex: 10" style={inputStyle} />
+                      </div>
+                      <div>
+                        <label style={labelStyle}>Volume (Optional)</label>
+                        <input type="text" name="volume" value={formData.volume} onChange={handleInputChange} placeholder="e.g. Vol 1" style={inputStyle} />
+                      </div>
+                      <div>
+                        <label style={labelStyle}>Issue (Optional)</label>
+                        <input type="text" name="issue" value={formData.issue} onChange={handleInputChange} placeholder="e.g. Issue 1" style={inputStyle} />
+                      </div>
+                      <div>
+                        <label style={labelStyle}>Publication Month (Optional)</label>
+                        <input type="text" name="publicationMonth" value={formData.publicationMonth} onChange={handleInputChange} placeholder="e.g. September or Jan - Jun" style={inputStyle} />
+                      </div>
+                      <div>
+                        <label style={labelStyle}>Publication Year (Optional)</label>
+                        <input type="text" name="publicationYear" value={formData.publicationYear} onChange={handleInputChange} placeholder="e.g. 2026" style={inputStyle} />
+                      </div>
+                      <div>
+                        <label style={labelStyle}>DOI (Optional)</label>
+                        <input type="text" name="doi" value={formData.doi} onChange={handleInputChange} placeholder="e.g. 10.1234/praxis..." style={inputStyle} />
                       </div>
                     </div>
                   </div>
